@@ -1,0 +1,7 @@
+Average runtime per repetition (single learning instance)
+========================================================================
+Algorithm                              Stochastic (s) Deterministic (s)
+------------------------------------------------------------------------
+Q-learning (n=0)                                 5.07              9.31
+Dyna (best n stoch=1, det=3)                     3.00              9.51
+Prioritized Sweeping (best n stoch=5, det=5)             23.54             20.05

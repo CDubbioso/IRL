@@ -32,7 +32,7 @@ def run_repetitions(method, n_repetitions, n_timesteps, eval_interval,
     runtimes = np.zeros(n_repetitions)
 
     for rep in range(n_repetitions):
-        # Each repetition: brand new environment and agent (no fixed seed)
+        # Each repetition: brand new environment and agent 
         env = WindyGridworld(wind_proportion=wind_proportion)
         eval_env = WindyGridworld(wind_proportion=wind_proportion)
 
@@ -49,7 +49,7 @@ def run_repetitions(method, n_repetitions, n_timesteps, eval_interval,
 
         t0 = time.time()
         for t in range(n_timesteps):
-            # Evaluate at every eval_interval timesteps (incl. t=0)
+            # Evaluate at every eval_interval timesteps 
             if t % eval_interval == 0:
                 eval_returns[rep, eval_idx] = agent.evaluate(
                     eval_env,
@@ -74,23 +74,13 @@ def run_repetitions(method, n_repetitions, n_timesteps, eval_interval,
     mean_returns = eval_returns.mean(axis=0)
     return eval_timesteps, mean_returns, runtimes.mean()
 
-
-def smooth_if_possible(y, window):
-    """ Apply Savitzky-Golay smoothing if the window is small enough. """
-    if window is None or window <= 1 or window > len(y):
-        return y
-    if window % 2 == 0:
-        window += 1
-    return smooth(y, window)
-
-
 def planning_budget_experiment(method, wind_proportion, n_planning_updatess,
                                n_repetitions, n_timesteps, eval_interval,
                                learning_rate, gamma, epsilon,
                                max_episode_length, smoothing_window,
                                title, filename):
-    """ Run a learning-curve experiment for one method on one environment,
-    sweeping over different planning budgets (incl. 0 = Q-learning baseline).
+    """ Learning-curve experiment for one method on one environment,
+    sweeping over different planning budgets 
 
     Returns a dict mapping n_planning_updates -> (eval_timesteps, mean_returns, mean_runtime).
     """
@@ -101,7 +91,6 @@ def planning_budget_experiment(method, wind_proportion, n_planning_updatess,
     for k in n_planning_updatess:
         if k == 0:
             label = 'Q-learning (n=0)'
-            # Q-learning is recovered by Dyna with 0 planning updates -> use dyna
             run_method = 'dyna'
         else:
             label = f'{method.upper()} (n={k})'
@@ -122,7 +111,7 @@ def planning_budget_experiment(method, wind_proportion, n_planning_updatess,
         )
         print(f"    mean runtime / rep: {runtime:.2f} s, "
               f"final eval mean: {mean_ret[-1]:.2f}")
-        smoothed = smooth_if_possible(mean_ret, smoothing_window)
+        smoothed = smooth(mean_ret, smoothing_window)
         plot.add_curve(eval_t, smoothed, label=label)
         results[k] = (eval_t, mean_ret, runtime)
 
@@ -133,7 +122,7 @@ def planning_budget_experiment(method, wind_proportion, n_planning_updatess,
 
 def best_planning_key(results, exclude=(0,)):
     """ Pick the best planning budget from a results dict by final-window
-    mean evaluation return. Excludes the keys in `exclude` (typically Q-learning). """
+    mean evaluation return """
     best_k, best_score = None, -np.inf
     for k, (eval_t, mean_ret, _) in results.items():
         if k in exclude:
@@ -152,19 +141,18 @@ def comparison_plot(dyna_results, ps_results, label_env, filename,
     best PS, and Q-learning baseline. """
     plot = LearningCurvePlot(title=f'Comparison ({label_env})')
 
-    # Q-learning baseline (n=0) should appear in both dicts -- use dyna's
     eval_t, mean_ret, _ = dyna_results[0]
-    plot.add_curve(eval_t, smooth_if_possible(mean_ret, smoothing_window),
+    plot.add_curve(eval_t, smooth(mean_ret, smoothing_window),
                    label='Q-learning (n=0)')
 
     best_dyna_k = best_planning_key(dyna_results, exclude=(0,))
     eval_t, mean_ret, _ = dyna_results[best_dyna_k]
-    plot.add_curve(eval_t, smooth_if_possible(mean_ret, smoothing_window),
+    plot.add_curve(eval_t, smooth(mean_ret, smoothing_window),
                    label=f'Dyna (n={best_dyna_k})')
 
     best_ps_k = best_planning_key(ps_results, exclude=(0,))
     eval_t, mean_ret, _ = ps_results[best_ps_k]
-    plot.add_curve(eval_t, smooth_if_possible(mean_ret, smoothing_window),
+    plot.add_curve(eval_t, smooth(mean_ret, smoothing_window),
                    label=f'Prioritized Sweeping (n={best_ps_k})')
 
     plot.save(name=filename)
@@ -203,7 +191,7 @@ def write_runtime_table(dyna_results_stoch, ps_results_stoch,
 
 
 def experiment():
-    # ---- Hyperparameters ----
+    # Hyperparameters 
     n_timesteps = 10001
     eval_interval = 250
     n_repetitions = 20
@@ -215,10 +203,11 @@ def experiment():
 
     wind_proportions = [0.9, 1.0]
     n_planning_updatess = [1, 3, 5]
+    
     # We add 0 to recover Q-learning as the model-free baseline
     sweep = [0] + n_planning_updatess
 
-    # ---- Section 1c: Dyna planning-budget experiment ----
+    # Part 1: Dyna planning-budget experiment 
     dyna_results_stoch = planning_budget_experiment(
         method='dyna', wind_proportion=0.9,
         n_planning_updatess=sweep,
@@ -242,7 +231,7 @@ def experiment():
         filename='dyna_deterministic.png',
     )
 
-    # ---- Section 2c: Prioritized sweeping planning-budget experiment ----
+    # Part 2: Prioritized sweeping planning-budget experiment
     ps_results_stoch = planning_budget_experiment(
         method='ps', wind_proportion=0.9,
         n_planning_updatess=sweep,
@@ -266,7 +255,7 @@ def experiment():
         filename='ps_deterministic.png',
     )
 
-    # ---- Section 3: Comparison plots ----
+    # Part 3: Comparison plots 
     best_dyna_stoch, best_ps_stoch = comparison_plot(
         dyna_results_stoch, ps_results_stoch,
         label_env='wind_proportion=0.9',
@@ -280,7 +269,7 @@ def experiment():
         smoothing_window=smoothing_window,
     )
 
-    # ---- Runtime table ----
+    # Runtime table 
     write_runtime_table(
         dyna_results_stoch, ps_results_stoch,
         dyna_results_det, ps_results_det,

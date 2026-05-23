@@ -18,12 +18,14 @@ class DynaAgent:
         self.learning_rate = learning_rate
         self.gamma = gamma
 
+        # initialize elements for Dyna
         self.Q_sa = np.zeros((n_states, n_actions))
         self.n_sa_s = np.zeros((n_states, n_actions, n_states))
         self.Rsum_sa_s = np.zeros((n_states, n_actions, n_states))
 
         
     def select_action(self, s, epsilon):
+        # e-greedy action selection
         if np.random.random() < epsilon:
             a = np.random.randint(0, self.n_actions)
         else:
@@ -31,39 +33,38 @@ class DynaAgent:
         return a
 
     def update(self,s,a,r,done,s_next,n_planning_updates):
-        # ---- Update model (Algorithm 2) ----
-        self.n_sa_s[s, a, s_next] += 1
-        self.Rsum_sa_s[s, a, s_next] += r
+        self.n_sa_s[s, a, s_next] += 1      # update transition counts
+        self.Rsum_sa_s[s, a, s_next] += r   # update reward sums
 
-        # ---- Real-experience Q-learning update ----
+        # update Q-table 
         td_target = r + self.gamma * np.max(self.Q_sa[s_next])
         self.Q_sa[s, a] += self.learning_rate * (td_target - self.Q_sa[s, a])
 
-        # ---- Planning loop ----
+        # planning loop 
         if n_planning_updates <= 0:
             return
 
-        # All (s,a) pairs that have been visited at least once: n(s,a) > 0
+        # (s,a) pairs that have been visited at least once: n(s,a) > 0
         n_sa = self.n_sa_s.sum(axis=2)
         observed = np.argwhere(n_sa > 0)
         if len(observed) == 0:
             return
 
         for _ in range(n_planning_updates):
-            # Pick a random previously observed (s,a)
+            # pick a random previously observed (s,a)
             idx = np.random.randint(len(observed))
             sp, ap = observed[idx]
 
-            # Sample s' from estimated transition function p_hat(s'|s,a)
+            # sample s' from estimated transition function p_hat(s'|s,a)
             counts = self.n_sa_s[sp, ap]
             total = counts.sum()
-            probs = counts / total
-            s_prime = np.random.choice(self.n_states, p=probs)
+            probs = counts / total      # estimate transition function 
+            s_prime = np.random.choice(self.n_states, p=probs)  
 
-            # Estimated reward r_hat(s,a,s')
+            # estimated reward function r_hat(s,a,s')
             r_hat = self.Rsum_sa_s[sp, ap, s_prime] / counts[s_prime]
 
-            # Q-learning update with simulated transition
+            # update Q-table 
             td_target = r_hat + self.gamma * np.max(self.Q_sa[s_prime])
             self.Q_sa[sp, ap] += self.learning_rate * (td_target - self.Q_sa[sp, ap])
 
@@ -93,12 +94,14 @@ class PrioritizedSweepingAgent:
         self.gamma = gamma
         self.priority_cutoff = priority_cutoff
         
+        # initialize elements for Prioritized Sweeping
         self.queue = PriorityQueue()
         self.Q_sa = np.zeros((n_states, n_actions))
         self.n_sa_s = np.zeros((n_states, n_actions, n_states))
         self.Rsum_sa_s = np.zeros((n_states, n_actions, n_states))
 
     def select_action(self, s, epsilon):
+        # e-greedy action selection
         if np.random.random() < epsilon:
             a = np.random.randint(0, self.n_actions)
         else:
@@ -106,19 +109,18 @@ class PrioritizedSweepingAgent:
         return a
 
     def update(self,s,a,r,done,s_next,n_planning_updates):
-
-        # ---- Update model (Algorithm 2) ----
         self.n_sa_s[s, a, s_next] += 1
         self.Rsum_sa_s[s, a, s_next] += r
 
-        # ---- Compute priority for the real transition and possibly enqueue ----
+        # compute priority 
         p = abs(r + self.gamma * np.max(self.Q_sa[s_next]) - self.Q_sa[s, a])
+        # state-action needs update, add to queue
         if p > self.priority_cutoff:
-            # PriorityQueue pops the smallest first, so we negate the priority
-            self.queue.put((-p, (s, a)))
+            self.queue.put((-p, (s, a)))    # -p converts to a max-queue
 
-        # ---- Planning loop ----
+        # planning loop 
         for _ in range(n_planning_updates):
+            # sample PQ, break when empty
             if self.queue.empty():
                 break
             _, (sp, ap) = self.queue.get()
@@ -128,22 +130,24 @@ class PrioritizedSweepingAgent:
             if total == 0:
                 continue
 
-            # Sample s' from estimated transition function
+            # sample s' from estimated transition function p_hat(s'|s,a)
             probs = counts / total
+            # simulate model
             s_prime = np.random.choice(self.n_states, p=probs)
             r_hat = self.Rsum_sa_s[sp, ap, s_prime] / counts[s_prime]
 
-            # Q-learning update with simulated transition
+            # update Q-table
             td_target = r_hat + self.gamma * np.max(self.Q_sa[s_prime])
             self.Q_sa[sp, ap] += self.learning_rate * (td_target - self.Q_sa[sp, ap])
 
-            # ---- Loop over all predecessors (s_bar, a_bar) with n(s_bar, a_bar, sp) > 0 ----
+            # predecessors loop (s_bar, a_bar) with n(s_bar, a_bar, sp) > 0 
             predecessors = np.argwhere(self.n_sa_s[:, :, sp] > 0)
             for s_bar, a_bar in predecessors:
-                r_bar = self.Rsum_sa_s[s_bar, a_bar, sp] / self.n_sa_s[s_bar, a_bar, sp]
-                p_bar = abs(r_bar + self.gamma * np.max(self.Q_sa[sp]) - self.Q_sa[s_bar, a_bar])
+                r_bar = self.Rsum_sa_s[s_bar, a_bar, sp] / self.n_sa_s[s_bar, a_bar, sp]            # get reward from model
+                p_bar = abs(r_bar + self.gamma * np.max(self.Q_sa[sp]) - self.Q_sa[s_bar, a_bar])   # compute priority p 
+                # state-action needs update, add to queue 
                 if p_bar > self.priority_cutoff:
-                    self.queue.put((-p_bar, (int(s_bar), int(a_bar))))
+                    self.queue.put((-p_bar, (int(s_bar), int(a_bar))))  # -p_bar converts to a max-queue
 
     def evaluate(self,eval_env,n_eval_episodes=30, max_episode_length=100):
         returns = []  # list to store the reward per episode

@@ -12,8 +12,8 @@ We evaluate both algorithms on a variant of the Windy Gridworld environment. Thi
 Dyna is a model-based algorithm that expands the standard Q-learning with planning: it learnes a model of the environment, and subsequently use this model to make additional one-step planning updates to our value function. We keep the model as two tables, the transition counts $n(s,a,s′)$ and the accumulated reward sums $R_{sum}(s,a,s′)$, both initialised to zero. After observing a transition $(s,a,r,s')$, we update these counts:
 
 $$\begin{aligned}
-    n(s,a,s') &\leftarrow n(s,a,s') + 1 \\
-    R_{\text{sum}}(s,a,s') &\leftarrow R_{\text{sum}}(s,a,s') + r
+    n(s,a,s') & \leftarrow n(s,a,s') + 1 \\
+    R_{\text{sum}}(s,a,s') & \leftarrow R_{\text{sum}}(s,a,s') + r
 \end{aligned}$$
 
 from which we obtain the estimated transition distribution and the estimated reward function:

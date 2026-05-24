@@ -90,10 +90,10 @@ def planning_budget_experiment(method, wind_proportion, n_planning_updatess,
     results = {}
     for k in n_planning_updatess:
         if k == 0:
-            label = 'Q-learning (n=0)'
+            label = 'Q-learning (K=0)'
             run_method = 'dyna'
         else:
-            label = f'{method.upper()} (n={k})'
+            label = f'{method.upper()} (K={k})'
             run_method = method
 
         print(f"  running {label} ...")
@@ -143,17 +143,17 @@ def comparison_plot(dyna_results, ps_results, label_env, filename,
 
     eval_t, mean_ret, _ = dyna_results[0]
     plot.add_curve(eval_t, smooth(mean_ret, smoothing_window),
-                   label='Q-learning (n=0)')
+                   label='Q-learning (K=0)')
 
     best_dyna_k = best_planning_key(dyna_results, exclude=(0,))
     eval_t, mean_ret, _ = dyna_results[best_dyna_k]
     plot.add_curve(eval_t, smooth(mean_ret, smoothing_window),
-                   label=f'Dyna (n={best_dyna_k})')
+                   label=f'Dyna (K={best_dyna_k})')
 
     best_ps_k = best_planning_key(ps_results, exclude=(0,))
     eval_t, mean_ret, _ = ps_results[best_ps_k]
     plot.add_curve(eval_t, smooth(mean_ret, smoothing_window),
-                   label=f'Prioritized Sweeping (n={best_ps_k})')
+                   label=f'Prioritized Sweeping (K={best_ps_k})')
 
     plot.save(name=filename)
     print(f"  saved {filename}")
@@ -177,11 +177,11 @@ def write_runtime_table(dyna_results_stoch, ps_results_stoch,
 
     dyna_stoch = dyna_results_stoch[best_dyna_stoch][2]
     dyna_det = dyna_results_det[best_dyna_det][2]
-    lines.append(f"{'Dyna (best n stoch=' + str(best_dyna_stoch) + ', det=' + str(best_dyna_det) + ')':<35}{dyna_stoch:>18.2f}{dyna_det:>18.2f}")
+    lines.append(f"{'Dyna (best K stoch=' + str(best_dyna_stoch) + ', det=' + str(best_dyna_det) + ')':<35}{dyna_stoch:>18.2f}{dyna_det:>18.2f}")
 
     ps_stoch = ps_results_stoch[best_ps_stoch][2]
     ps_det = ps_results_det[best_ps_det][2]
-    lines.append(f"{'Prioritized Sweeping (best n stoch=' + str(best_ps_stoch) + ', det=' + str(best_ps_det) + ')':<35}{ps_stoch:>18.2f}{ps_det:>18.2f}")
+    lines.append(f"{'Prioritized Sweeping (best K stoch=' + str(best_ps_stoch) + ', det=' + str(best_ps_det) + ')':<35}{ps_stoch:>18.2f}{ps_det:>18.2f}")
 
     text = "\n".join(lines)
     with open(filename, "w") as f:

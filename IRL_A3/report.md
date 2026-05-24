@@ -10,22 +10,22 @@ We evaluate both algorithms on a variant of the Windy Gridworld environment. Thi
 ## Dyna
 ### Methodology 
 Dyna is a model-based algorithm that expands the standard Q-learning with planning: it learnes a model of the environment, and subsequently use this model to make additional one-step planning updates to our value function. We keep the model as two tables, the transition counts n(s,a,s′) and the accumulated reward sums R_sum(s,a,s′), both initialised to zero. After observing a transition (s,a,r,s′), we update these counts:
-$$\begin{center}
+$$\begin{aligned}
     n(s,a,s') \leftarrow n(s,a,s') + 1 
     R_{\text{sum}}(s,a,s') \leftarrow R_{\text{sum}}(s,a,s') + r 
-\end{center}$$
+\end{aligned}$$
 from which we obtain the estimated transition distribution and the estimated reward function:
-$$\begin{center}
+$$\begin{aligned}
     \hat{p}(s' \mid s,a) = \frac{n(s,a,s')}{\sum_{s''} n(s,a,s'')}
     \hat{r}(s,a,s') = \frac{R_{\text{sum}}(s,a,s')}{n(s,a,s')} 
-\end{center}$$
+\end{aligned}$$
 Each environment step is used for the update of the Q-table 
-$$\begin{center}
+$$\begin{aligned}
     Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right] 
-\end{center}$$
-where \alpha is the learning rate, \gamma the discount factor, and the therm within brackets the temporal difference error. 
-We then perform K planning updates (n_planning_updates), and for each: we sample at random a state-action pair that we previously observed, we simulate the environment $$s', r \sim \hat{p}(s', r \mid s, a)$$ from the learned model, and apply the same Q-learning updateusing the simulated transition. Actions are selected through a \epsilon-greedy policy. 
-We evaluate the agent every 250 timesteps by running 30 greedy episodes (maximum length 100) and recording the mean return. We then average all learning curves over 20 independent repetitions, each with a freshly initialised environment and agent, and then smoothed. For this experiment we fixed the following hyperparameters to: \epsilon=0.1, \alpha=0.2 and \gamma=1.0; and compared planning budgets $K \in$ {$0$,$1$,$3$,$5$} on both the stochastic (wind_proportion=0.9) and deterministic (wind_proportion=1.0) environments. 
+\end{aligned}$$
+where $\alpha$ is the learning rate, $\gamma$ the discount factor, and the therm within brackets the temporal difference error. 
+We then perform K planning updates (n_planning_updates), and for each: we sample at random a state-action pair that we previously observed, we simulate the environment $$s', r \sim \hat{p}(s', r \mid s, a)$$ from the learned model, and apply the same Q-learning updateusing the simulated transition. Actions are selected through a $\epsilon$-greedy policy. 
+We evaluate the agent every 250 timesteps by running 30 greedy episodes (maximum length 100) and recording the mean return. We then average all learning curves over 20 independent repetitions, each with a freshly initialised environment and agent, and then smoothed. For this experiment we fixed the following hyperparameters to: $\epsilon=0.1$, $\alpha=0.2$ and $\gamma=1.0$; and compared planning budgets K $\in$ {0,1,3,5} on both the stochastic (wind_proportion=0.9) and deterministic (wind_proportion=1.0) environments. 
 ### Results 
 In the deterministic environment (Fugure 1), the planning budget produces a clear ordering: all configurations start at a return of -$100$ and at different speed they all converge close to a return of $80$. Dyna with the planning update K=5 is the fastest to reach the highest reward approximately in 3500 timesteps, followed by K=3 and finally K=1, while the model-free baseline K=0 begins to improve only around timestep 6000. This shows that planning is a vital component to reduce the number of steps actually needed to learn the optimal policy without undermining the final performance. 
 In the stochastic environemt (Figure 2), the polt result more noisy. The learning order is approximately similar to the deterministic environment: higher planning budget accelerates the initial learning and return, with K=5 followed by K=3 and K=1; but the asymptotic behaviour is opposite. The highest planning budget flattens earliest and at the lowest final return, whereas the lowest non-zero budget K=1 continues improving and achieves the best final return, close to +$75$. The model-free baseline K=0, despite beeing the slowest to learn, ultimately reaches a final return slightly below the best planning configuration. 

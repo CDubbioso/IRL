@@ -1,28 +1,34 @@
 # Report
 ## Introduction 
-Reinforcement Learning (RL) is a computational framework for automating goal-directed learning through direct interaction with an environment, in which an agent learns to map states to actions so as to maximise a cumulative reward signal. In the previous assignments we addressed this problem through model-free methods, such as Q-learning. In this assignment we apply Model-Based Reinforcement Learning (MBRL), in which the agent in addition learns a model of the environment's dynamics and reuses it through planning, updating its value estimates from simulated transitions in between real environment steps. This introduces a central trade-off: planning allows the agent to extract more learning from each real interaction, improving sample efficiency, at the cost of additional computation per step and a dependence on the accuracy of the learned model. We explore two main MBRL algorithms with \lambda-greedy exploration: Dyna and Prioritized Sweeping. Dyna plans from randomly sampled previously-observed transitions, while Prioritized Sweeping focuses its planning effort on the transitions with the largest value changes and propagates these updates backward to predecessor states. For both, we study the effect of the planning budget (n_planning_updates) and of the degree of environmental stochasticity (wind_proportion), comparing each to a model-free Q-learning baseline. 
+Reinforcement Learning (RL) is a computational framework for automating goal-directed learning through direct interaction with an environment, in which an agent learns to map states to actions so as to maximise a cumulative reward signal. In the previous assignments we addressed this problem through model-free methods, such as Q-learning. In this assignment we apply Model-Based Reinforcement Learning (MBRL), in which the agent in addition learns a model of the environment's dynamics and reuses it through planning, updating its value estimates from simulated transitions in between real environment steps. This introduces a central trade-off: planning allows the agent to extract more learning from each real interaction, improving sample efficiency, at the cost of additional computation per step and a dependence on the accuracy of the learned model. We explore two main MBRL algorithms with $\epsilon$-greedy exploration: Dyna and Prioritized Sweeping. Dyna plans from randomly sampled previously-observed transitions, while Prioritized Sweeping focuses its planning effort on the transitions with the largest value changes and propagates these updates backward to predecessor states. For both, we study the effect of the planning budget (n_planning_updates) and of the degree of environmental stochasticity (wind_proportion), comparing each to a model-free Q-learning baseline. 
 
 
 ## The Environment
-We evaluate both algorithms on a variant of the Windy Gridworld environment. This environment is a $10 × 7$ grid ($70$ states) in which the agent can move to an adjacent cell in one of four directions: up, down, left or right. The agent always starts at location ($0$,$3$), indicated by 'S', and its goal is to reach location ($7$,$3$), indicated by 'G' (we index from $0$, as it is in Python). Reaching the goal generates a reward of $+100$ and terminates the episode, while every other step incurs a reward of $−1$, which incentivises the agent to find the shortest path to the goal. What characterize the environment is the presence of a vertical wind that pushes the agent upward: in columns $3$, $4$, $5$ and $8$ the wind displaces the agent by one cell per timestep, and in columns $6$ and $7$ by two cells. The wind does not blow on every step. The proportion of timesteps on which it blows is controlled by the wind_proportion parameter, which we treat as an experimental variable: setting wind_proportion=$0.9$ yields a stochastic environment, in which the agent feels the wind on most steps but experiences windstill conditions on the remaining $10%$, making the transition function non-deterministic. Setting wind_proportion=$1.0$ makes the wind blow on every step, recovering a fully deterministic environment in which the agent must still learn to compensate for the constant upward drift. 
+We evaluate both algorithms on a variant of the Windy Gridworld environment. This environment is a $10 × 7$ grid ($70$ states) in which the agent can move to an adjacent cell in one of four directions: up, down, left or right. The agent always starts at location ($0,3$), indicated by 'S', and its goal is to reach location ($7,3$), indicated by 'G' (we index from $0$, as it is in Python). Reaching the goal generates a reward of $+100$ and terminates the episode, while every other step incurs a reward of $−1$, which incentivises the agent to find the shortest path to the goal. What characterize the environment is the presence of a vertical wind that pushes the agent upward: in columns $3$, $4$, $5$ and $8$ the wind displaces the agent by one cell per timestep, and in columns $6$ and $7$ by two cells. The wind does not blow on every step. The proportion of timesteps on which it blows is controlled by the wind_proportion parameter, which we treat as an experimental variable: setting wind_proportion=$0.9$ yields a stochastic environment, in which the agent feels the wind on most steps but experiences windstill conditions on the remaining $10%$, making the transition function non-deterministic. Setting wind_proportion=$1.0$ makes the wind blow on every step, recovering a fully deterministic environment in which the agent must still learn to compensate for the constant upward drift. 
 
 
 ## Dyna
 ### Methodology 
-Dyna is a model-based algorithm that expands the standard Q-learning with planning: it learnes a model of the environment, and subsequently use this model to make additional one-step planning updates to our value function. We keep the model as two tables, the transition counts n(s,a,s′) and the accumulated reward sums R_sum(s,a,s′), both initialised to zero. After observing a transition (s,a,r,s′), we update these counts:
+Dyna is a model-based algorithm that expands the standard Q-learning with planning: it learnes a model of the environment, and subsequently use this model to make additional one-step planning updates to our value function. We keep the model as two tables, the transition counts n(s,a,s′) and the accumulated reward sums R_sum(s,a,s′), both initialised to zero. After observing a transition $(s,a,r,s')$, we update these counts:
+
 $$\begin{aligned}
-    n(s,a,s') \leftarrow n(s,a,s') + 1 
-    R_{\text{sum}}(s,a,s') \leftarrow R_{\text{sum}}(s,a,s') + r 
+    n(s,a,s') &\leftarrow n(s,a,s') + 1 \\
+    R_{\text{sum}}(s,a,s') &\leftarrow R_{\text{sum}}(s,a,s') + r
 \end{aligned}$$
+
 from which we obtain the estimated transition distribution and the estimated reward function:
+
 $$\begin{aligned}
-    \hat{p}(s' \mid s,a) = \frac{n(s,a,s')}{\sum_{s''} n(s,a,s'')}
-    \hat{r}(s,a,s') = \frac{R_{\text{sum}}(s,a,s')}{n(s,a,s')} 
+    \hat{p}(s' \mid s,a) &= \frac{n(s,a,s')}{\sum_{s''} n(s,a,s'')} \\
+    \hat{r}(s,a,s') &= \frac{R_{\text{sum}}(s,a,s')}{n(s,a,s')}
 \end{aligned}$$
-Each environment step is used for the update of the Q-table 
+
+Each environment step is used for the update of the Q-table:
+
 $$\begin{aligned}
-    Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right] 
+    Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right]
 \end{aligned}$$
+
 where $\alpha$ is the learning rate, $\gamma$ the discount factor, and the therm within brackets the temporal difference error. 
 We then perform K planning updates (n_planning_updates), and for each: we sample at random a state-action pair that we previously observed, we simulate the environment $$s', r \sim \hat{p}(s', r \mid s, a)$$ from the learned model, and apply the same Q-learning updateusing the simulated transition. Actions are selected through a $\epsilon$-greedy policy. 
 We evaluate the agent every 250 timesteps by running 30 greedy episodes (maximum length 100) and recording the mean return. We then average all learning curves over 20 independent repetitions, each with a freshly initialised environment and agent, and then smoothed. For this experiment we fixed the following hyperparameters to: $\epsilon=0.1$, $\alpha=0.2$ and $\gamma=1.0$; and compared planning budgets K $\in$ {0,1,3,5} on both the stochastic (wind_proportion=0.9) and deterministic (wind_proportion=1.0) environments. 

@@ -151,7 +151,7 @@ Prioritized sweeping focuses on efficiently updating the value function by ident
 - pop the highest $\rightarrow$ update it $\rightarrow$ use the reverse model to find predecessors and queue the ones taht also pass $\theta$
 $\rightarrow$ new information than races backwards along the paths that lead to it. 
 
-$$ p \leftarrow \abs{ r + \gamma \cdot \max_{a'}\hat{Q}(s',a') - \hat{Q}(s,a) } $$
+$$ p \leftarrow | r + \gamma \cdot \max_{a'}\hat{Q}(s',a') - \hat{Q}(s,a) | $$
 
 where:
 - $r + \gamma \cdot \max_{a'}\hat{Q}(s',a')$ is the ***new Q-learning estimate*** 
@@ -217,10 +217,10 @@ $\rightarrow$ Downside: only considers cost so far ignoring future potential
 
 ---
 ### Heuristic Search ($A$\*)
-    - Actual cumulative cost from "start" to state "$s$" $(g(s))$ + estimated cumulative cost from "$s$" to "end" $(h(s))$ 
-        * Heuristic $h(s)$ must be **admissible** (never overestimate) to guarantee finding the best path.
-        * Perfect heuristic = optimal value function $V^*(s)$.
-        * $f(s) = g(s) \to \text{Dijkstra’s algorithm/Uniform-cost search} + h(s) \to \text{cumulative cost from s to end} = \text{A* search}$.
+- Actual cumulative cost from "start" to state "$s$" $(g(s))$ + estimated cumulative cost from "$s$" to "end" $(h(s))$ 
+    - Heuristic $h(s)$ must be **admissible** (never overestimate) to guarantee finding the best path.
+    - Perfect heuristic = optimal value function $V^*(s)$.
+    - $f(s) = g(s) \to \text{Dijkstra’s algorithm/Uniform-cost search} + h(s) \to \text{cumulative cost from s to end} = \text{A* search}$.
 
 $\rightarrow$ Heuristic are a way to reduce the depth of a search. Can we also reduce the width? $\rightarrow$ ***Forward Pruning*** $\downarrow$
 

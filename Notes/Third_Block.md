@@ -151,7 +151,7 @@ Prioritized sweeping focuses on efficiently updating the value function by ident
 - pop the highest $\rightarrow$ update it $\rightarrow$ use the reverse model to find predecessors and queue the ones taht also pass $\theta$
 $\rightarrow$ new information than races backwards along the paths that lead to it. 
 
-$$ p \leftarrow | r + \gamma \cdot \max_{a'}\hat{Q}(s',a') - \hat{Q}(s,a) | $$
+$$ p \leftarrow \abs{ r + \gamma \cdot \max_{a'}\hat{Q}(s',a') - \hat{Q}(s,a) } $$
 
 where:
 - $r + \gamma \cdot \max_{a'}\hat{Q}(s',a')$ is the ***new Q-learning estimate*** 

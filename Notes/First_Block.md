@@ -25,11 +25,14 @@ Standard Environment : actions change and influence future rewards
 
 $\Rightarrow$ both share exploration-exploitation tradeoff
 
+---
 
 ### BANDIT
 $$\langle A, p(r,a) \rangle$$
 - $A$ set of discrete actions
 - $p(r,a)$ conditional probability distribution that maps each action to a distribution over possible rewards
+
+---
 
 ### $Q(a)$ - Action Value **or** Expected Reward **of an action** 
 
@@ -48,6 +51,8 @@ $$Q(a) = 0 \qquad \forall a \in A$$
 
 $$Q(a) = \phi \qquad \forall a \in A$$
 
+---
+
 ### $\pi(a)$ - Policy **or** Action Selection
 
 $$\pi(a) \in [0,1] \qquad \forall a \in A \qquad , \qquad \sum_{a \in A} \pi(a) = 1$$
@@ -59,6 +64,8 @@ $$\pi(a) \in [0,1] \qquad \forall a \in A \qquad , \qquad \sum_{a \in A} \pi(a) 
 
 * ***Explicit policy*** : directly stores the probabilities in $\pi(a)$
 * ***Implicit policy*** : probabilities are derived from Q-values
+
+---
 
 ### Estimate a Mean
 
@@ -78,27 +85,29 @@ $$Q_n = Q_{n-1} + \frac{1}{n} [r_n - Q_{n-1}]$$
 
 $$Q(n) \leftarrow Q_{n-1} + \alpha [r_n - Q_{n-1}]$$
 
+---
+
 ### Bandit Algorithms
 3 things we have to decide:
 1. **initial estimates** of $Q(a)$ $\rightarrow$ realistic or optimistic
 2. **policy** $\rightarrow$ how to select actions (exploration-exploitation)
 3. **update rule** 
 
-### $\epsilon$-Greedy policy 
+### 1. $\epsilon$-Greedy policy 
 
 $$ \pi_{\epsilon-\text{greedy}}(a) = \begin{cases} 1 - \epsilon, & \text{if } a = \arg\max_{b \in A} Q(b) \\ \frac{\epsilon}{|A|-1}, & \text{otherwise} \end{cases} $$
 
 - balances exploration and exploitation by chosing the best action with probability $1-\epsilon$, and exploring other actions randomly with probability $\epsilon$ 
 - $\epsilon \in [0,1]$, scales the amount od exploration 
 
-### **Greedy Policy with** Optimistic Initialization - OI 
+### 2. **Greedy Policy with** Optimistic Initialization - OI 
 
 $$ \pi_{\text{greedy}}(a) = \begin{cases} 1, & \text{if } a = \arg\max_{b \in A} Q(b) \\ 0, & \text{otherwise} \end{cases} $$
 
 - this selects the best known action with certanty 
 - OI ensures that initially all actions are explored by setting high initial estimates for $Q(a)$
 
-### UCB - Upper Confidence Bound
+### 3. UCB - Upper Confidence Bound
 
 $$ \pi_{\text{UCB}}(a) = \begin{cases} 1, & \text{if } a = \arg\max_{a} \left[ Q(a) + c \cdot \sqrt{\frac{\ln t}{n(a)}} \right] \\ 0, & \text{otherwise} \end{cases} $$
 
@@ -161,7 +170,7 @@ $$ p(\tau) = \pi(a_t | s_t) \cdot p(r_t, s_{t+1} | s_t, a_t) \cdot \pi(a_{t+1} |
 $\rightarrow$ sum of rewards of a trace
 $\rightarrow$ down-weight long-term rewards $\rightarrow$ Discounted Return 
 
-$$ R(\tau) = r_t + r_{t+1} + r_{t+2} \dots \qquad $\rightarrow$ \qquad R(\tau) = r_t + \gamma \cdot r_{t+1} + {\gamma}^2 \cdot r_{t+2} \dots $$
+$$ R(\tau) = r_t + r_{t+1} + r_{t+2} \dots \qquad \rightarrow \qquad R(\tau) = r_t + \gamma \cdot r_{t+1} + {\gamma}^2 \cdot r_{t+2} \dots $$
 
 ### Infinite Horizon 
 $\rightarrow$ sum of rewards infinitely unless a terminal state is reached
@@ -210,7 +219,7 @@ Bellman Equation for $q(s,a)$:
 $$ q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma \cdot \mathbb{E}_{a' \sim \pi(a'|s')} [q^{\pi}(s',a')]] $$
 
 Bellman Equation from building blocks:
-$$ v^{\pi}(s) = \mathbb{E}_{a \sim \pi(a|s)} [q^{\pi}(s,a)] \qquad q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma v^{\pi}(s)] $$
+$$ v^{\pi}(s) = \mathbb{E}_{a \sim \pi(a|s)} [q^{\pi}(s,a)] \qquad q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma v^{\pi}(s')] $$
 
 
 ### Policy Improvement 
@@ -223,7 +232,7 @@ $$\pi^{\text{greedy}}(s) = \text{argmax}_a q^{\pi}(s,a)$$
 
 - for $v(s)$ 
 
-$$\pi^{\text{greedy}}(s) = \text{argmax}_a \methbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma \cdot v(s')]$$
+$$\pi^{\text{greedy}}(s) = \text{argmax}_a \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma \cdot v(s')]$$
 
 
 ### Value Iteration 

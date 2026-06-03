@@ -95,21 +95,24 @@ $$Q(n) \leftarrow Q_{n-1} + \alpha [r_n - Q_{n-1}]$$
 
 ### 1. $\epsilon$-Greedy policy 
 
-$$ \pi_{\epsilon-\text{greedy}}(a) = \begin{cases} 1 - \epsilon, & \text{if } a = \arg\max_{b \in A} Q(b) \\ \frac{\epsilon}{|A|-1}, & \text{otherwise} \end{cases} $$
+$$ \pi_{\epsilon-\text{greedy}}(a) = \begin{cases} 1 - \epsilon, & \text{if } a = \arg\max_{b \in A} Q(b) \\ 
+\frac{\epsilon}{|A|-1}, & \text{otherwise} \end{cases} $$
 
 - balances exploration and exploitation by chosing the best action with probability $1-\epsilon$, and exploring other actions randomly with probability $\epsilon$ 
 - $\epsilon \in [0,1]$, scales the amount od exploration 
 
 ### 2. **Greedy Policy with** Optimistic Initialization - OI 
 
-$$ \pi_{\text{greedy}}(a) = \begin{cases} 1, & \text{if } a = \arg\max_{b \in A} Q(b) \\ 0, & \text{otherwise} \end{cases} $$
+$$ \pi_{\text{greedy}}(a) = \begin{cases} 1, & \text{if } a = \arg\max_{b \in A} Q(b) \\ 
+0, & \text{otherwise} \end{cases} $$
 
 - this selects the best known action with certanty 
 - OI ensures that initially all actions are explored by setting high initial estimates for $Q(a)$
 
 ### 3. UCB - Upper Confidence Bound
 
-$$ \pi_{\text{UCB}}(a) = \begin{cases} 1, & \text{if } a = \arg\max_{a} \left[ Q(a) + c \cdot \sqrt{\frac{\ln t}{n(a)}} \right] \\ 0, & \text{otherwise} \end{cases} $$
+$$ \pi_{\text{UCB}}(a) = \begin{cases} 1, & \text{if } a = \arg\max_{a} \left[ Q(a) + c \cdot \sqrt{\frac{\ln t}{n(a)}} \right] \\ 
+0, & \text{otherwise} \end{cases} $$
 
 where:
 - $c$ controls the amount of exploration $\rightarrow$ $c$ bigger = more exploration
@@ -180,7 +183,7 @@ $$R(\tau) = \sum_{i=0}^{\infty} \gamma^i \cdot r_{t+i}$$
 ### VALUE 
 $\rightarrow$ expected return when starting from "$s$" with a policy "$\pi$" 
 
-$$ v^{\pi(s)} = \mathbb{E}_{\tau \sim p^{\pi}(\tau)} [r_t + \gamma \cdot r_{t+1} + \gamma^2 \cdot r_{t+2} + \dots | s_t = s] $$ 
+$$ v^{\pi}(s) = \mathbb{E}_{\tau \sim p^{\pi}(\tau)} [r_t + \gamma \cdot r_{t+1} + \gamma^2 \cdot r_{t+2} + \dots | s_t = s] $$ 
 
 - this gives the expected total reward form a state, considering future rewards
 - each policy has its own value function shown with $v^{\pi}(s)$
@@ -219,6 +222,7 @@ Bellman Equation for $q(s,a)$:
 $$ q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma \cdot \mathbb{E}_{a' \sim \pi(a'|s')} [q^{\pi}(s',a')]] $$
 
 Bellman Equation from building blocks:
+
 $$ v^{\pi}(s) = \mathbb{E}_{a \sim \pi(a|s)} [q^{\pi}(s,a)] \qquad q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma v^{\pi}(s')] $$
 
 

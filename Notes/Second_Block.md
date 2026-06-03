@@ -125,10 +125,12 @@ $$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \sum_a (\
 $\rightarrow$ It can be used on-policy or off-policy. If the target policy is **greedy**, Expected Sarsa becomes
 exactly **Q-learning**.
 
+---
+
 | **Method**         | **Bootstraped next-state target**           | **Policy type** |
 | ------------------ | ------------------------------------------- | --------------- |
 | **SARSA**          | $Q(s',a')$ for the sampled next action $a'$ | on-policy       |
-| **Expected SARSA** | $\sum_a \pi(a|s')A(s',a)$                   | either          |
+| **Expected SARSA** | $\sum_a \pi(a,s')A(s',a)$                   | either          |
 | **Q-Learning**     | $\max_a Q(s',a)$                            | off-policy      |
 
 --- 

@@ -157,3 +157,148 @@ where:
 - $r + \gamma \cdot \max_{a'}\hat{Q}(s',a')$ is the ***new Q-learning estimate*** 
 - $\hat{Q}(s,a)$ is the ***current estimate***
 
+
+---
+# Sample-Based Planning
+Planning means using a model of the environment to look ahead and find good actions.
+
+- Exhaustive search: Finds the best action but needs huge computation (samples $\sim b^d$, where b=branching factor, d=depth).
+- Search algorithms try to visit important states first to save computation.
+
+1. What is the plan for?
+    - improve a global solution $\rightarrow$ ***background*** or 
+    - pick one action now $\rightarrow$ ***decision-time***
+2. How do we expand the tree? 
+    - sistematically enumerate it $\rightarrow$ ***classic search*** 
+    - estimate action values by sampling $\rightarrow$ ***sample-based***
+
+---
+## Types of Planning
+**Decision-Time** vs **Background Planning**
+- **Decision-time planning**: Focuses on picking the best action for the current state. (e.g., A*, MCTS)
+- **Background planning**: Improves global policy or value function (like learning). (e.g., Dynamic Programming, Dyna)
+
+| Background planning | Decision-time planning |
+|---------------------|------------------------|
+| Use lookahead in the model to **update a global (value/policy) solution**. | Use lookahead in the model to **find a good action for the current state** $s$. |
+| Improves the overall solution. This is often just called *learning*. | Focuses the entire budget on the current decision. |
+| e.g. Dynamic Programming, Dyna. | e.g. A*, MCTS. |
+| Traditionally a **smaller** tree. | Traditionally a **larger** tree that is discarded afterwards. |
+
+---
+## Classic Planning 
+**Tree** vs **Graph Search**
+- **Tree search:** Explores states like a tree, but can waste time on repeated states.
+- **Graph search:** Avoids repeated states by tracking **explored** (**closed list**) and **frontier** (**open list**)
+
+Key Idea : track every node (open or closed) in the graph and the optimal path towards it $\rightarrow$ and update both lists on every expansion
+
+Main Challenge : In what order shall we visit state-actions? 
+- solution:
+    - Uninformed Search 
+    - Heuristinc and the Best-First Family
+    - reducing width 
+
+---
+### Uninformed Search 
+- **BFS** - Breadth-First Search
+- **DFS** - Depth-Fist Search
+- **Iterative Deepening** 
+
+$\rightarrow$ Downsides: may miss better paths because they ignore costs/rewards/weights.
+- solution: expand the node which currently looks most promising $\downarrow$
+
+- **Uniformed Cost Search** - **Dijkstra**'s algorithm 
+    - expand the node that looks most promising, meaning the lowest cumulative cost so far
+    - usefull with non-uniform costs; with uniform rewards it reduces to BFS
+
+$\rightarrow$ Downside: only considers cost so far ignoring future potential 
+- solution: construct a heuristic function to predict the remaining potential $\downarrow$
+
+---
+### Heuristic Search ($A$\*)
+    - Actual cumulative cost from "start" to state "$s$" $(g(s))$ + estimated cumulative cost from "$s$" to "end" $(h(s))$ 
+        * Heuristic $h(s)$ must be **admissible** (never overestimate) to guarantee finding the best path.
+        * Perfect heuristic = optimal value function $V^*(s)$.
+        * $f(s) = g(s) \to \text{Dijkstra’s algorithm/Uniform-cost search} + h(s) \to \text{cumulative cost from s to end} = \text{A* search}$.
+
+$\rightarrow$ Heuristic are a way to reduce the depth of a search. Can we also reduce the width? $\rightarrow$ ***Forward Pruning*** $\downarrow$
+
+**Forward Pruning** : directly eliminate some of the available actions
+- Limits actions explored (like ***beam search***), but risks removing the best action
+
+**Stochastic Dynamics** : classical planning primarly focused on deterministic settings
+- Extends classic algorithms (e.g., $A$\* → $AO$\*) by expanding all possible outcomes of actions
+- Problem: 
+    - needs analytic model and heuristic, but often only simulators are available; large branching in stochastic cases
+    - makes the search wide, since we need to expand all possible next states, which gives an extra/double branching factor
+
+Heuristic search is efficient in deterministic problems where a good heuristic is available, but in many problems also faces it challenges: 
+- Required **depth**: heuristic necessary to reduce depth, but often not available 
+- Required **width**: action pruning is risky, and stochastic dynamics make the search even wider 
+- Required **model**: needs analytic transition probabilities, but often only a simulator 
+is available 
+
+$\rightarrow$ Solution : ***sample-based planning***
+
+---
+## Sample-Based Planning 
+Idea : replace systematic enumeration of the tree with statistical / Monte Carlo estimation of action values. Instead of expanding everything, sample trajectories and average their returns. 
+
+Benefits:
+- No need for heuristic $\rightarrow$ instead, use Monte Carlo roll-out
+- No need for forward pruning of actions $\rightarrow$ instead, decide based on uncertanty principles
+- No need to expand all stochastic dynamics $\rightarrow$ intead, simply sample one
+- No need for extract transition probabilities $\rightarrow$ instead, only needs a simulator
+
+| **Problem** | **How sampling removes it** |
+|-------------|-------------------|
+| **Depth**   | No heuristic needed. Use a **Monte Carlo roll-out** to estimate value instead. |
+| **Width**   | No forward pruning needed: decide using **uncertainty principles** (bandits). No need to expand all stochastic outcomes: simply **sample one** next state. |
+| **Model**   | No exact transition probabilities needed: only a **simulator**. |
+
+---
+### 1. Monte Carlo Search - MCS
+- For each action, sample $N$ trajectories (rollouts) until depth $D$ with a rollout policy (random or better) 
+- Estimate action value $Q(s,a)$ by average returns, pick action with highest $Q$
+- _Downside_: 
+    - does not improve policy below the current step; 
+    - has no memory of past samples 
+
+### 2. Sparse Sampling
+- Like MCS but repeats sampling at every level up to depth D (policy improvement at all depths). 
+- _Downside_: 
+    - sample complexity grows exponentially in $D$: $(A \cdot N)^D$. Very expensive.
+        - _Solution_: use an adaptive Monte Carlo method
+            - replace uniform sampling with adaptive bandit algorithm that focuses on directions where initial samples perform well, trading off exploration and exploitation 
+
+### 3. Monte Carlo Tree Search - MCTS
+Idea : iteratively apply an adaptive bandit algorithm at every depth. This produces an asymmetric search tree that extends deeper in each direction where initial samples gave promising returns. 
+
+- Improves on Sparse Sampling by focusing sampling on promising actions using adaptive bandit algorithms (e.g., UCT)
+- Builds an **asymmetric tree**, deeper where returns are better
+- four phases:
+    1. **Selection**: Use UCT to select action balancing exploration/exploitation
+    2. **Expansion**: Add new state when an unvisited action is chosen
+        - each iteration expands only one new state
+    3. **Simulation**: run Monte Carlo roll-out from new state to estimate the value of the expanded state
+    4. **Backup**: Update statistics up the tree to direct the next iteration 
+        - ***action nodes*** store:
+            - visit count $n(s,a)$ 
+            - mean return $Q(s,a)$
+        - ***state nodes*** store:
+            - visit count $n(s)$
+
+---
+## Iterated Planning and Learning
+- **Pure planning is expensive** and may lack good heuristics.
+- **Pure learning may have errors** in value/policy estimates.
+- Combining both is powerful:
+    - Use planning to fix errors in learned values at decision-time.
+    - Use planning to generate data for learning in background.
+- **AlphaGo** is an example that combines planning and learning iteratively.
+- Analogy:
+    - **Learned value function** = "Thinking fast" (quick decisions).
+    - **Decision-time planning** = "Thinking slow" (careful analysis).
+- Both work together for better decisions.
+

@@ -1,6 +1,6 @@
 # Model-Based RL
 
-## Access to MPD Dynamics
+## Access to MDP Dynamics
 The dynamic function $p(s'|s,a)$ says which next state $s'$ can follow when you take an action $a$ in state $s$. The kind of access you are allowed to this function decides which alorithm you can run.
 
 **Access** is **Reversible or Irreversible**?

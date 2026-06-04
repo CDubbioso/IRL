@@ -92,13 +92,13 @@ $\rightarrow$ but $G_t$ is only known after the episode ends
 Solution : **TD(0)**
 - one-step target built from the immediate reward plus the discounted estimate of the next state:
 
-$$v_{\pi}(s_t) \leftarrow v_{\pi}(s_t) + \alpha \left[ R_{t+1} + \gamma v_{\pi}(s_{t+1}) - v_{\pi}(s_t) \right]$$
+$$v_{\pi}(s_t) \leftarrow v_{\pi}(s_t) + \alpha \left[ R_{t+1} + \gamma \cdot v_{\pi}(s_{t+1}) - v_{\pi}(s_t) \right]$$
 
 ---
 ## SARSA - on-policy TD control 
 Sarsa is an on-policy method where the agent learns the value of the current policy:
 
-$$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t) \right] $$
+$$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \cdot Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t) \right] $$
 
 - **Key Point**: Sarsa updates the Q-value based on the action taken in the next state, making it more conservative than Q-learning.
 
@@ -108,7 +108,7 @@ $$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma Q(s_{t+1}
 ## Q-Learning - off-policy TD control
 Q-learning is an off-policy method where the agent learns the optimal policy using a greedy target:
 
-$$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right] $$
+$$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \cdot \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right] $$
 
 - **Key Point**: The maximization bias occurs when the agent overestimates action values.
 - **Solution**: **Double Q-learning** uses two independent Q-tables to reduce maximization bias.

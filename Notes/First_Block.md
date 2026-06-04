@@ -185,7 +185,7 @@ $\rightarrow$ sum of rewards infinitely unless a terminal state is reached
 $$R(\tau) = \sum_{i=0}^{\infty} \gamma^i \cdot r_{t+i}$$
 
 ### VALUE 
-$\rightarrow$ expected return when starting from "$s$" with a policy "$\pi$" 
+$\rightarrow$ expected return when starting from "$'s'$" with a policy "$'\pi'$" 
 
 $$ v^{\pi}(s) = \mathbb{E}_{\tau \sim p^{\pi}(\tau)} [r_t + \gamma \cdot r_{t+1} + \gamma^2 \cdot r_{t+2} + \dots | s_t = s] $$ 
 
@@ -198,7 +198,7 @@ $$ v^{\pi}(s) = \mathbb{E}_{\tau \sim p^{\pi}(\tau)} [r_t + \gamma \cdot r_{t+1}
 ## Dynamic Programming
 $\rightarrow$ you need complete knowledge of the environment
 
-Algorithm that computes optima decisions in environments that can be built as Markov Decision Processes (MDPs) 
+Algorithm that computes optimal decisions in environments that can be built as Markov Decision Processes (MDPs) 
 - DP acts like a bridge between planning and learning through experience
 - DP takes full knowledge of the environment using transition probabilities $p(s' | s,a)$ and expected reward $r(s,a,s')$
 
@@ -227,7 +227,7 @@ $$ q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma \cdot \math
 
 Bellman Equation from building blocks:
 
-$$ v^{\pi}(s) = \mathbb{E}_{a \sim \pi(a|s)} [q^{\pi}(s,a)] \qquad q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma v^{\pi}(s')] $$
+$$ v^{\pi}(s) = \mathbb{E}_{a \sim \pi(a|s)} [q^{\pi}(s,a)] \qquad q^{\pi}(s,a) = \mathbb{E}_{s' \sim p(s'|a,s)} [r(s,a,s') + \gamma \cdot v^{\pi}(s')] $$
 
 
 ### Policy Improvement 

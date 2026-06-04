@@ -39,7 +39,7 @@ $$\langle A, p(r,a) \rangle$$
 $$Q(a) = \mathbb{E}_{r \sim p(r,a)} [r]$$
 
 - average reward you'd expect from choosing action $a$ if you pulled it infinitely many times
-- is the true value of that arm, but since you don't know "$p(r,a)$", you have to estimate it $\rightarrow$ _experience_ 
+- is the true value of that arm, but since you don't know "$'p(r,a)'$", you have to estimate it $\rightarrow$ _experience_ 
 
 Initialization of $Q(a)$
 - **Realistic Initialization** $\rightarrow$ initial guess that the reward for each action is $0$
@@ -57,10 +57,10 @@ $$Q(a) = \phi \qquad \forall a \in A$$
 
 $$\pi(a) \in [0,1] \qquad \forall a \in A \qquad , \qquad \sum_{a \in A} \pi(a) = 1$$
 
-- a policy $\pi(a)$ is a probability distribution over the action space $A$, where each action "$a$" is assigned a probability of being selected
+- a policy $\pi(a)$ is a probability distribution over the action space $A$, where each action "$'a'$" is assigned a probability of being selected
 
 - defines the agent's compete strategy $\rightarrow$ $\pi(a)$ tells exactly how likely the agent is too choose each available action 
-    - different policies just define different ways od distribution that probability across the actions
+    - different policies just define different ways of distributing that probability across the actions
 
 * ***Explicit policy*** : directly stores the probabilities in $\pi(a)$
 * ***Implicit policy*** : probabilities are derived from Q-values

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intro to RL — Revision Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3ede1;
+    --paper2:#ece3d3;
+    --ink:#22231f;
+    --ink-soft:#54564e;
+    --line:#d8cdb8;
+    --teal:#0f6b5c;
+    --teal-deep:#0a4d42;
+    --gold:#9a6a00;
+    --good:#1d7a4d;
+    --good-bg:#dcefdf;
+    --bad:#b1462b;
+    --bad-bg:#f3ddd4;
+    --shadow:0 1px 0 rgba(0,0,0,.04), 0 12px 30px -18px rgba(34,35,31,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(120% 80% at 100% 0%, #f7f2e8 0%, transparent 55%),
+      radial-gradient(120% 90% at 0% 100%, #efe7d6 0%, transparent 50%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Spline Sans",system-ui,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:32px 18px 80px;
+  }
+  .wrap{max-width:820px;margin:0 auto}
+
+  /* Header */
+  header{margin-bottom:26px;position:relative}
+  .eyebrow{
+    font-family:"Spline Sans Mono",monospace;
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--teal);font-weight:600;margin-bottom:10px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow:before{content:"";width:26px;height:1px;background:var(--teal);display:inline-block}
+  h1{
+    font-family:"Fraunces",serif;font-weight:600;
+    font-size:clamp(30px,6vw,46px);line-height:1.02;letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  h1 em{font-style:italic;color:var(--teal-deep)}
+  .sub{color:var(--ink-soft);margin-top:10px;max-width:60ch;font-size:15px}
+
+  /* Cards */
+  .card{
+    background:linear-gradient(180deg,#fbf7ee, #f6f0e3);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:26px 26px 24px;
+  }
+
+  /* Topic picker */
+  .blocklabel{
+    font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--gold);font-weight:600;
+    margin:22px 0 10px;display:flex;align-items:center;gap:10px;
+  }
+  .blocklabel:after{content:"";flex:1;height:1px;background:var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-family:"Spline Sans",sans-serif;font-size:13.5px;font-weight:500;
+    background:var(--paper);border:1px solid var(--line);color:var(--ink);
+    padding:8px 13px;border-radius:999px;cursor:pointer;
+    transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease;
+    user-select:none;display:inline-flex;align-items:center;gap:7px;
+  }
+  .chip .n{font-family:"Spline Sans Mono",monospace;font-size:11px;color:var(--ink-soft)}
+  .chip:hover{transform:translateY(-1px);border-color:var(--teal)}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .chip.on .n{color:#cdeae3}
+
+  .picker-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;align-items:center}
+  .btn{
+    font-family:"Spline Sans",sans-serif;font-weight:600;font-size:15px;
+    border:none;border-radius:11px;padding:13px 22px;cursor:pointer;
+    transition:transform .12s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-primary{background:var(--teal);color:#fff;box-shadow:0 10px 22px -12px var(--teal-deep)}
+  .btn-primary:hover{transform:translateY(-1px);background:var(--teal-deep)}
+  .btn-primary:disabled{background:#b9c4bf;box-shadow:none;cursor:not-allowed;transform:none}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--teal);color:var(--teal-deep)}
+  .pickhint{font-size:13px;color:var(--ink-soft);font-family:"Spline Sans Mono",monospace}
+
+  .selectrow{display:flex;gap:8px;margin-bottom:4px}
+  .mini{
+    font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.05em;
+    background:transparent;border:1px dashed var(--line);color:var(--ink-soft);
+    padding:5px 10px;border-radius:8px;cursor:pointer;
+  }
+  .mini:hover{border-color:var(--teal);color:var(--teal-deep)}
+
+  /* Quiz */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:14px}
+  .progress{flex:1;height:7px;background:var(--paper2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-deep));width:0;transition:width .35s cubic-bezier(.4,0,.2,1)}
+  .counter{font-family:"Spline Sans Mono",monospace;font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
+  .score{font-family:"Spline Sans Mono",monospace;font-size:12.5px;color:var(--teal-deep);font-weight:600;white-space:nowrap}
+
+  .qtag{
+    font-family:"Spline Sans Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:12px;
+  }
+  .qtext{font-family:"Fraunces",serif;font-weight:500;font-size:clamp(20px,3.4vw,25px);line-height:1.28;letter-spacing:-.005em;margin-bottom:18px}
+  .qtext code{font-family:"Spline Sans Mono",monospace;font-size:.86em;background:var(--paper2);padding:1px 6px;border-radius:6px}
+
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{
+    text-align:left;width:100%;cursor:pointer;
+    background:var(--paper);border:1.5px solid var(--line);border-radius:12px;
+    padding:14px 16px;font-size:15px;font-family:"Spline Sans",sans-serif;color:var(--ink);
+    display:flex;gap:13px;align-items:flex-start;line-height:1.4;
+    transition:border-color .14s ease, background .14s ease, transform .1s ease;
+  }
+  .opt:hover:not(:disabled){border-color:var(--teal);transform:translateX(2px)}
+  .opt:disabled{cursor:default}
+  .opt .key{
+    flex:none;width:24px;height:24px;border-radius:7px;background:var(--paper2);
+    border:1px solid var(--line);display:grid;place-items:center;
+    font-family:"Spline Sans Mono",monospace;font-size:12px;font-weight:600;color:var(--ink-soft);
+    transition:all .14s ease;
+  }
+  .opt.correct{border-color:var(--good);background:var(--good-bg)}
+  .opt.correct .key{background:var(--good);border-color:var(--good);color:#fff}
+  .opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+  .opt.wrong .key{background:var(--bad);border-color:var(--bad);color:#fff}
+  .opt.dim{opacity:.55}
+
+  .expl{
+    margin-top:16px;border-radius:12px;padding:14px 16px;font-size:14.5px;line-height:1.5;
+    border:1px solid var(--line);background:var(--paper2);
+    animation:rise .3s ease both;
+  }
+  .expl.ok{border-color:#bfe0c8;background:var(--good-bg)}
+  .expl.no{border-color:#e8c6ba;background:var(--bad-bg)}
+  .expl b{font-weight:600}
+  .expl .verdict{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;display:block;margin-bottom:6px}
+  .expl.ok .verdict{color:var(--good)}
+  .expl.no .verdict{color:var(--bad)}
+  .expl code{font-family:"Spline Sans Mono",monospace;font-size:.86em;background:rgba(0,0,0,.05);padding:1px 5px;border-radius:5px}
+
+  .navrow{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:12px}
+
+  /* Results */
+  .result{text-align:center;padding:10px 0 4px}
+  .ring{margin:6px auto 18px;width:148px;height:148px;position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .pct{
+    position:absolute;inset:0;display:grid;place-items:center;flex-direction:column;
+    font-family:"Fraunces",serif;font-weight:600;font-size:38px;color:var(--teal-deep);
+  }
+  .ring .pct small{display:block;font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--ink-soft);font-weight:500;margin-top:2px}
+  .verdictline{font-family:"Fraunces",serif;font-size:22px;font-weight:500;margin-bottom:6px}
+  .breakdown{margin-top:22px;text-align:left}
+  .brow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .brow:last-child{border-bottom:none}
+  .brow .name{flex:1;font-size:14px}
+  .brow .bar{flex:none;width:120px;height:6px;background:var(--paper2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+  .brow .bar > i{display:block;height:100%;background:var(--teal)}
+  .brow .frac{font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--ink-soft);width:46px;text-align:right}
+
+  .hidden{display:none}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .fade{animation:rise .28s ease both}
+  footer{margin-top:26px;text-align:center;font-family:"Spline Sans Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Introduction to Reinforcement Learning</div>
+    <h1>Revision <em>Quiz</em></h1>
+    <p class="sub">Pick the blocks or topics you want to drill, then work through them one question at a time. Every answer comes with a short explanation. Nothing is graded but you — the score is just for you.</p>
+  </header>
+
+  <!-- PICKER -->
+  <section id="picker" class="card">
+    <div class="selectrow">
+      <button class="mini" id="selAll">select all</button>
+      <button class="mini" id="selNone">clear</button>
+      <span class="pickhint" id="poolCount" style="margin-left:auto"></span>
+    </div>
+    <div id="topicList"></div>
+    <div class="picker-actions">
+      <button class="btn btn-primary" id="startBtn" disabled>Start quiz</button>
+      <label class="chip" style="cursor:pointer"><input type="checkbox" id="shuffleChk" checked style="accent-color:var(--teal)"> shuffle order</label>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="card hidden">
+    <div class="topbar">
+      <div class="progress"><i id="progBar"></i></div>
+      <span class="counter" id="counter"></span>
+      <span class="score" id="liveScore"></span>
+    </div>
+    <div class="qtag" id="qtag"></div>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div id="explBox"></div>
+    <div class="navrow">
+      <button class="btn btn-ghost" id="quitBtn">Quit</button>
+      <button class="btn btn-primary" id="nextBtn" disabled>Next</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="card hidden">
+    <div class="result">
+      <div class="ring">
+        <svg width="148" height="148">
+          <circle cx="74" cy="74" r="64" fill="none" stroke="var(--line)" stroke-width="12"/>
+          <circle id="ringFill" cx="74" cy="74" r="64" fill="none" stroke="var(--teal)" stroke-width="12" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+        </svg>
+        <div class="pct"><span id="pctNum">0%</span><small id="pctFrac"></small></div>
+      </div>
+      <div class="verdictline" id="verdict"></div>
+      <p class="sub" id="resultNote" style="margin:0 auto;max-width:46ch"></p>
+      <div class="breakdown" id="breakdown"></div>
+      <div class="picker-actions" style="justify-content:center;margin-top:26px">
+        <button class="btn btn-primary" id="againBtn">Try again</button>
+        <button class="btn btn-ghost" id="newBtn">Choose new topics</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>Self-study tool · answers reflect the course framing (Leiden Intro to RL)</footer>
+</div>
+
+<script>
+/* ===================== QUESTION BANK ===================== */
+const BLOCKS = [
+  {id:"b1", label:"Block I — Exploration & Dynamic Programming"},
+  {id:"b2", label:"Block I cont. — Model-free RL"},
+  {id:"b3", label:"Block II — Model-based RL"},
+  {id:"b4", label:"Block III — Advanced Topics & Connections"},
+];
+const TOPICS = [
+  {id:"overview", block:"b1", name:"Intuition & course overview"},
+  {id:"bandits",  block:"b1", name:"Multi-armed bandits"},
+  {id:"mdp",      block:"b1", name:"Markov Decision Processes"},
+  {id:"dp",       block:"b1", name:"Dynamic Programming"},
+  {id:"mc",       block:"b2", name:"Monte Carlo methods"},
+  {id:"td",       block:"b2", name:"Temporal Difference learning"},
+  {id:"sarsa",    block:"b2", name:"SARSA"},
+  {id:"qlearn",   block:"b2", name:"Q-learning"},
+  {id:"esarsa",   block:"b2", name:"Expected SARSA"},
+  {id:"nstep",    block:"b2", name:"n-step methods"},
+  {id:"maxbias",  block:"b2", name:"Max. bias & Double learning"},
+  {id:"credit",   block:"b2", name:"Credit assignment"},
+  {id:"model",    block:"b3", name:"Learning a model"},
+  {id:"rtdp",     block:"b3", name:"Real-Time DP"},
+  {id:"dyna",     block:"b3", name:"Dyna"},
+  {id:"psweep",   block:"b3", name:"Prioritized Sweeping"},
+  {id:"interplay",block:"b3", name:"Planning & learning interplay"},
+  {id:"psych",    block:"b4", name:"Psychology & Neuroscience"},
+  {id:"mcts",     block:"b4", name:"Decision-time planning / MCTS"},
+  {id:"approx",   block:"b4", name:"Function approximation / deep RL"},
+  {id:"policy",   block:"b4", name:"Policy-based RL"},
+  {id:"alphago",  block:"b4", name:"Applications: AlphaGo"},
+];
+
+// q: question, o: options, a: correct index, e: explanation
+const Q = [
+/* ---------- Overview ---------- */
+{t:"overview",q:"What is the key difference in <i>feedback</i> between supervised learning and reinforcement learning?",
+o:["RL gets full labels for every state; SL only rewards","RL gets only partial, evaluative feedback; SL full labels","Both receive the correct action as a label each step","Neither method uses any feedback signal at all"],a:1,
+e:"SL is given a labelled dataset (x with correct y); RL must actively collect data and only sees partial, evaluative feedback — a reward signal, not the correct action."},
+{t:"overview",q:"RL is described as the computational specification of which psychological idea?",
+o:["Classical conditioning, learning stimulus associations","Instrumental conditioning, trial-and-error from reward","Cognitive dissonance reduction over repeated trials","Short-term working-memory rehearsal of states"],a:1,
+e:"The course frames RL as the computational version of instrumental conditioning — Skinner-box style learning of behaviour from reward and punishment through trial and error."},
+{t:"overview",q:"In the act-then-update loop, what are the two repeating steps?",
+o:["Observe the current state, then memorise it for later","Act to collect experience, then update the solution","Train on a fixed dataset, then test on held-out data","Plan a full trajectory, then discard the model"],a:1,
+e:"You repeatedly (1) act — collecting experience while trading off exploration and exploitation — and (2) update — using that data to improve your value/policy estimates (credit assignment)."},
+{t:"overview",q:"What does the dataset look like in RL compared to SL?",
+o:["Both RL and SL are given a fixed dataset upfront","RL collects its own data; SL is given a dataset","SL collects its own data; RL is given a dataset","Neither RL nor SL makes use of any data"],a:1,
+e:"A core distinction: the RL agent generates its own data by interacting with the environment, whereas SL starts from a given, static dataset."},
+{t:"overview",q:"What is the ultimate objective in a sequential decision-making problem?",
+o:["Achieve the single highest reward available anywhere","Find the optimal policy: best action in every state","Follow the shortest trajectory to a terminal state","Build a perfectly accurate model of the world"],a:1,
+e:"The goal is the optimal policy π*: the action-selection strategy that maximizes expected cumulative (long-run) reward from every state."},
+
+/* ---------- Bandits ---------- */
+{t:"bandits",q:"A multi-armed bandit is best described as what kind of problem?",
+o:["A multi-step, sequential decision problem","A one-step decision problem, a single state repeated","A supervised classification problem with labels","A model-based planning problem with known dynamics"],a:1,
+e:"Bandits are the simplest setting: one state, repeated single-step decisions among actions with unknown reward distributions — no transitions to other states."},
+{t:"bandits",q:"What is the central challenge in bandit problems?",
+o:["The curse of dimensionality in large state spaces","Assigning credit across many sequential steps","The exploration versus exploitation trade-off","Correcting the bias introduced by bootstrapping"],a:2,
+e:"With unknown reward distributions you must balance exploring novel actions against exploiting the one currently believed best."},
+{t:"bandits",q:"How is a sample-average action-value estimate Q(a) computed?",
+o:["The single most recent reward observed for a","The running mean of all rewards received for a","The largest reward ever observed for action a","The discounted sum of all rewards seen for a"],a:1,
+e:"Q(a) is just the running mean of the rewards observed each time action a was selected."},
+{t:"bandits",q:"In ε-greedy action selection, what happens with probability ε?",
+o:["Take the current greedy, highest-value action","Take a uniformly random action in order to explore","Terminate the current episode immediately","Reset all action-value estimates back to zero"],a:1,
+e:"With probability ε you pick a random action to explore; otherwise you act greedily on current estimates."},
+{t:"bandits",q:"How does the UCB exploration bonus for an action behave as its visit count n(a) grows?",
+o:["It grows larger as the visit count increases","It stays constant regardless of the visit count","It shrinks like 1/√n(a)","It turns negative once an action has been tried"],a:2,
+e:"UCB adds a bonus ∝ √(ln t / n(a)) — large for rarely-tried actions and decaying as ~1/√n(a), encoding shrinking uncertainty."},
+{t:"bandits",q:"With pure greedy selection, why does optimistic initialization help?",
+o:["It instantly yields the true action values","Tried actions disappoint; greedy switches","It adapts the learning rate during training","It removes the need for any reward signal"],a:1,
+e:"Setting estimates above the max possible reward makes each tried action fall short of its estimate, so greedy keeps switching to still-optimistic untried actions — manufacturing exploration."},
+
+/* ---------- MDP ---------- */
+{t:"mdp",q:"Which set of components defines a Markov Decision Process?",
+o:["Only a set of states and their associated rewards","States, actions, transition and reward functions","Only a state set together with a fixed policy","A neural network paired with a training dataset"],a:1,
+e:"An MDP = states S, actions A, transition dynamics p(s'|s,a), reward function, plus a discount factor γ."},
+{t:"mdp",q:"What does the Markov property state?",
+o:["Next state depends only on state and action","All rewards in the process are fully deterministic","Every state in the process is a terminal state","The policy is required to be fully deterministic"],a:0,
+e:"Markov = memoryless: given the current state and action, the future is independent of how you got there."},
+{t:"mdp",q:"The transition function maps:",
+o:["A state directly to a chosen action (s → a)","A state-action pair to a next state (s,a → s')","A received reward back to a state (r → s)","A chosen action to a received reward (a → r)"],a:1,
+e:"The dynamics p(s'|s,a) take a state-action pair to a (distribution over) next state — it needs both s and a."},
+{t:"mdp",q:"The state value V<sup>π</sup>(s) is:",
+o:["The immediate one-step reward received at s","The expected return from s when following π","The number of actions available in state s","The probability of leaving state s next step"],a:1,
+e:"V^π(s) is the expected return from s under policy π — averaged over the traces π and the dynamics induce."},
+{t:"mdp",q:"In a 'slippery' / windy gridworld, what does the slipperiness represent?",
+o:["The state space is simply larger than usual","Transitions are stochastic; the action may misfire","The discount factor is fixed at exactly zero","The optimal policy is guaranteed deterministic"],a:1,
+e:"Slippery/windy dynamics are stochastic: taking an action gives the intended next state only with some probability, otherwise you end up elsewhere."},
+
+/* ---------- DP ---------- */
+{t:"dp",q:"What does Dynamic Programming require that model-free methods do not?",
+o:["A neural network to approximate the values","A complete model: known transition and reward","A replay buffer of past real transitions","Injected exploration noise during the updates"],a:1,
+e:"DP needs the full dynamics so each backup can take the exact expectation over successor states."},
+{t:"dp",q:"Policy improvement consists of:",
+o:["Computing V for a single fixed policy","Acting greedily on current values","Adding exploration noise to the current policy","Sampling random episodes from the start state"],a:1,
+e:"Given current values, you improve the policy by making it greedy w.r.t. those values; evaluation then re-estimates values for the new policy."},
+{t:"dp",q:"How does value iteration differ from policy iteration?",
+o:["It is not guaranteed to ever converge","It merges both into one max step","It needs no model of the environment","It relies on sampled Monte Carlo returns"],a:1,
+e:"Value iteration applies the Bellman optimality backup (with the max over actions) directly each sweep, rather than running policy evaluation to convergence between improvements."},
+{t:"dp",q:"What is Generalized Policy Iteration (GPI)?",
+o:["A specific algorithm used only for bandits","Interleaving evaluation and improvement","A trick that avoids using the Bellman equation","A procedure purely for learning the model"],a:1,
+e:"GPI is the unifying spine of the course: evaluation and improvement repeatedly interacting, which describes DP, MC, TD, and beyond."},
+{t:"dp",q:"What makes tabular DP guaranteed to converge to the optimum?",
+o:["Because it uses a decaying learning rate","The Bellman operator is a contraction","Because it samples enough complete episodes","Because it keeps two separate value estimates"],a:1,
+e:"The Bellman optimality operator contracts errors by a factor γ each application, driving any initial estimate to the unique fixed point V*."},
+{t:"dp",q:"In a back-up diagram, what does an <i>expected</i> update over the dynamics look like?",
+o:["Following a single sampled successor state","Summing over successors by probability","Ignoring the environment dynamics entirely","Taking the maximum over the possible rewards"],a:1,
+e:"An expected (DP-style) backup branches over every possible next state weighted by p(s'|s,a); a sample backup would follow just one."},
+
+/* ---------- MC ---------- */
+{t:"mc",q:"Monte Carlo methods learn from:",
+o:["Single one-step transitions as they occur","Complete episodes, using the actual return","Predictions generated by a learned model","The Bellman optimality equation directly"],a:1,
+e:"MC waits until an episode ends and uses the observed return G as its update target."},
+{t:"mc",q:"Does Monte Carlo bootstrap?",
+o:["Yes, it updates from estimated successor values","No, it uses the real return, not an estimate","Only when applied to continuing, non-episodic tasks","Only when combined with function approximation"],a:1,
+e:"MC's defining feature is the absence of bootstrapping: the target is the real return, not r + γV(s')."},
+{t:"mc",q:"What is the 'wait for episode end' drawback of MC?",
+o:["It cannot learn action values at all","Updates wait for the episode to end","It requires a full model of the dynamics","It is unable to perform any exploration"],a:1,
+e:"Because the target is the full return, you must reach a terminal state before updating — awkward for long/continuing tasks and noisy because whole-episode returns vary a lot."},
+{t:"mc",q:"To estimate action values with first-visit MC, you:",
+o:["Average returns over individual states","Average returns over state-action pairs (s,a)","Derive Q from V using the known model","Take the maximum return seen for each state"],a:1,
+e:"Same procedure as for V, but you record and average the returns following the first visit to each (s,a) pair."},
+{t:"mc",q:"Why does on-policy MC control need exploring starts or an ε-soft policy?",
+o:["To make the bootstrapping target correct","To visit every (s,a) pair","To gradually reduce the discount factor","To force the learned policy to be deterministic"],a:1,
+e:"A purely greedy policy would never sample some actions; exploring starts or ε-soft behaviour guarantee coverage of all (s,a)."},
+
+/* ---------- TD ---------- */
+{t:"td",q:"The TD(0) update target for a state value is:",
+o:["The full Monte Carlo return G","r + γV(s'): reward plus estimated next value","The maximum over the next available actions","The average of every past reward received"],a:1,
+e:"TD(0) bootstraps: it updates V(s) toward r + γV(s'), using its own estimate of the next state."},
+{t:"td",q:"The TD error δ is defined as:",
+o:["V(s) − r, the value minus the reward","r + γV(s') − V(s)","G − V(s), the return minus the value","r − γV(s'), reward minus discounted value"],a:1,
+e:"δ = r + γV(s') − V(s): the gap between the bootstrapped target and the current estimate."},
+{t:"td",q:"Compared with Monte Carlo, TD learning is:",
+o:["TD is unbiased but suffers from high variance","TD is biased but lower-variance and updates online","TD and MC behave identically in all respects","TD can only be used when a model is available"],a:1,
+e:"Bootstrapping introduces bias but cuts variance and lets TD update at every step rather than waiting for the episode to end."},
+{t:"td",q:"Which statement about bootstrapping is true?",
+o:["MC bootstraps while TD does not","TD and DP bootstrap; MC uses actual returns","Only dynamic programming ever bootstraps","No reinforcement-learning method bootstraps"],a:1,
+e:"Bootstrapping = updating an estimate using other estimates; TD and DP do it, MC uses actual returns instead."},
+{t:"td",q:"As an intermediate between MC and one-step TD, what knob bridges them?",
+o:["The learning rate α used in the updates","The number of bootstrap steps n (TD ↔ MC)","The discount factor γ inside the return","The exploration rate ε of the policy"],a:1,
+e:"n-step methods interpolate: small n is TD-like (more bootstrapping), large n is MC-like (more actual reward)."},
+
+/* ---------- SARSA ---------- */
+{t:"sarsa",q:"SARSA is best classified as:",
+o:["Off-policy temporal-difference control","On-policy temporal-difference control","A Monte Carlo prediction method","A model-based planning method"],a:1,
+e:"SARSA learns the value of the policy it is actually following — on-policy TD control."},
+{t:"sarsa",q:"What does the acronym SARSA stand for?",
+o:["State, Action, Reward, State, Action","Sample, Average, Return, Sweep, Action","State, Average, Reward, Sample, Anneal","Sequential Action Reward State Approx."],a:0,
+e:"The update uses the tuple (s, a, r, s', a') — the next action a' is part of the target."},
+{t:"sarsa",q:"In the SARSA target r + γQ(s',a'), where does a' come from?",
+o:["The greedy (maximum-value) action at s'","The action the policy actually takes at s'","A uniformly random action chosen at s'","Whichever action happens to maximise Q"],a:1,
+e:"a' is sampled from the behaviour policy and is the action actually taken next — that's what makes SARSA on-policy."},
+{t:"sarsa",q:"A subtle implementation bug in SARSA is:",
+o:["Using the actual observed reward signal","Re-sampling a' instead of reusing the taken action","Updating the Q-table at every single time step","Applying a discount factor to the return"],a:1,
+e:"Re-sampling a fresh action for the update instead of reusing the a' you'll actually take breaks the on-policy assumption and changes the agent's behaviour."},
+{t:"sarsa",q:"On the cliff-walking task, SARSA tends to learn:",
+o:["The shortest, riskiest path along the edge","A safer path kept further from the cliff edge","No usable path to the goal at all","The same path a random policy would take"],a:1,
+e:"Because SARSA evaluates the exploratory policy (which occasionally steps off the cliff), it prefers a safer route; Q-learning, being off-policy, learns the optimal edge path."},
+
+/* ---------- Q-learning ---------- */
+{t:"qlearn",q:"Q-learning is:",
+o:["On-policy temporal-difference control","Off-policy temporal-difference control","A Monte Carlo prediction method","A model-based planning method"],a:1,
+e:"Q-learning learns the optimal (greedy) action values regardless of the behaviour policy — off-policy."},
+{t:"qlearn",q:"The Q-learning target is:",
+o:["r + γQ(s',a'), with a' sampled from the policy","r + γ·max over the next-state action values","The full Monte Carlo return G","Σ π(a'|s')·Q(s',a'), an expectation over actions"],a:1,
+e:"It bootstraps off the maximum next-state action value, which is why it's off-policy — it backs up the greedy action."},
+{t:"qlearn",q:"Why is Q-learning called off-policy?",
+o:["Because it never explores during learning","It learns the greedy policy regardless","Because it requires a model of the dynamics","Because it relies on Monte Carlo returns"],a:1,
+e:"The max in the target evaluates the greedy/target policy, decoupled from the exploratory behaviour policy generating the data."},
+{t:"qlearn",q:"A Q-learning update with q(s,a)=6, r=10, γ=0.75, next-action values {8,6,4}, α=0.2 gives:",
+o:["6","8","16","10"],a:1,
+e:"Target = 10 + 0.75·max{8,6,4} = 10+6 = 16. δ = 16−6 = 10. New q = 6 + 0.2·10 = 8."},
+{t:"qlearn",q:"Q-learning and SARSA share the same target when:",
+o:["They never share the same update target","The policy is greedy, so a' equals the max action","The discount factor γ is set to zero","The reward signal is held perfectly constant"],a:1,
+e:"If the behaviour policy is greedy, the sampled a' equals argmax Q, so the SARSA target coincides with the Q-learning max target."},
+
+/* ---------- Expected SARSA ---------- */
+{t:"esarsa",q:"The Expected SARSA target is:",
+o:["r + γQ(s',a') for a single sampled a'","r + γ·Σ π(a'|s')·Q(s',a'), over all actions","r + γ·max over the next-state actions","The full Monte Carlo return G"],a:1,
+e:"Instead of sampling a single next action, Expected SARSA averages over all next actions weighted by the policy probabilities."},
+{t:"esarsa",q:"What is the main advantage of Expected SARSA over plain SARSA?",
+o:["It requires a model of the environment","It removes sampling variance for a'","It performs strictly less bootstrapping","It is guaranteed to always be off-policy"],a:1,
+e:"Taking the expectation over a' eliminates the randomness of which next action was sampled, reducing update variance."},
+{t:"esarsa",q:"Expected SARSA reduces to Q-learning when:",
+o:["The behaviour policy is perfectly uniform","The target policy in the expectation is greedy","The discount factor γ equals zero","The learning rate α is set to one"],a:1,
+e:"If π puts all probability on argmax Q, the expectation Σ π(a')Q(s',a') becomes max Q — exactly the Q-learning target."},
+{t:"esarsa",q:"Is Expected SARSA on-policy or off-policy?",
+o:["It is always strictly on-policy","It is always strictly off-policy","Either, per the chosen policy","It is neither on- nor off-policy"],a:2,
+e:"It can be on-policy (expectation over the behaviour policy) or off-policy (expectation over a different target policy, e.g. greedy → Q-learning)."},
+
+/* ---------- n-step ---------- */
+{t:"nstep",q:"The n-step return uses:",
+o:["Only the immediate one-step reward","n rewards, then a bootstrap","The full return in every single case","The maximum over n possible actions"],a:1,
+e:"G_t^(n) = r_t + γr_{t+1} + … + γ^{n-1}r_{t+n-1} + γ^n V(s_{t+n}) — n real rewards plus a bootstrap tail."},
+{t:"nstep",q:"What do the extremes n=1 and n→∞ correspond to?",
+o:["Dynamic programming and policy iteration","TD(0) and Monte Carlo respectively","SARSA and Q-learning respectively","Dyna and Real-Time Dynamic Programming"],a:1,
+e:"n=1 is one-step TD(0); as n grows toward the episode length it becomes Monte Carlo (full return, no bootstrap)."},
+{t:"nstep",q:"What does increasing n trade off?",
+o:["Model size against estimation accuracy","Bias against variance (the TD↔MC spectrum)","On-policy against off-policy behaviour","Exploration against exploitation"],a:1,
+e:"n-step methods slide along the bias–variance spectrum between TD and MC."},
+{t:"nstep",q:"n-step SARSA applies the n-step idea to:",
+o:["State values V only","Action values Q, via an n-step return","The transition model of the environment","The reward function of the environment"],a:1,
+e:"n-step SARSA uses the multi-step return to update Q, propagating reward information back several steps at once."},
+
+/* ---------- Max bias / Double ---------- */
+{t:"maxbias",q:"What causes maximization bias in Q-learning?",
+o:["Setting too large a learning rate α","The same estimate selects and scores the max","Bootstrapping from Monte Carlo returns","A discount factor very close to one"],a:1,
+e:"The max of noisy estimates is biased upward because the action that looks best is disproportionately one that was overestimated by chance."},
+{t:"maxbias",q:"How does double learning remove this bias?",
+o:["Lowering the learning rate gradually over time","Two estimates: one selects, the other evaluates","Switching to Monte Carlo return targets","Increasing the amount of exploration"],a:1,
+e:"With Q1 and Q2, the noise that made an action look best in one estimate is not the same noise used to score it in the other, so chance overestimates don't reinforce themselves."},
+{t:"maxbias",q:"A practical cost of double Q-learning is:",
+o:["It now requires a model of the dynamics","Each estimate updates half as often","It can no longer perform any exploration","It only works on one-step bandit problems"],a:1,
+e:"Splitting updates across two tables means each is updated about half as often — the accepted price for removing the bias."},
+{t:"maxbias",q:"Maximization bias is most pronounced when:",
+o:["Estimates are exact and entirely noise-free","Estimates are noisy and there are many actions","The discount factor γ equals zero","The policy is deterministic and already correct"],a:1,
+e:"More actions and noisier estimates give the max more chances to latch onto an upward error, worsening the overestimation."},
+
+/* ---------- Credit assignment ---------- */
+{t:"credit",q:"The credit assignment problem asks:",
+o:["How best to store the learned model","Which actions were responsible for an outcome","How to normalise the transition counts","How to choose an appropriate learning rate"],a:1,
+e:"Especially with delayed rewards, the challenge is attributing an outcome back to the earlier actions/states that caused it."},
+{t:"credit",q:"'Temporal' credit assignment specifically concerns:",
+o:["Credit across a neural network's layers","Assigning credit across time for delayed reward","Assigning credit across multiple agents","Generalising value estimates across states"],a:1,
+e:"It's about bridging the time gap between an action and a later reward — distinct from backprop-style structural credit assignment."},
+{t:"credit",q:"Which mechanism propagates reward information back over multiple steps faster?",
+o:["Simply using a larger discount factor","n-step methods and eligibility traces","Optimistic initial value estimates","Maintaining two separate value tables"],a:1,
+e:"Multi-step returns (and their exponentially-decaying form, eligibility traces) spread credit back across several preceding states in one update."},
+
+/* ---------- Learning a model ---------- */
+{t:"model",q:"How is the tabular transition model p(s'|s,a) estimated from data?",
+o:["By averaging the observed rewards","By normalising counts n(s,a,s') over visits","By taking the single most likely next state","By bootstrapping from the value estimates"],a:1,
+e:"p̂(s'|s,a) = n(s,a,s') / Σ_{s'} n(s,a,s') — the empirical frequency of each next state."},
+{t:"model",q:"How is the reward model r(s,a,s') estimated?",
+o:["By taking the maximum reward observed","By averaging the rewards for that transition","By normalising the transition counts","Directly from the chosen discount factor"],a:1,
+e:"Maintain a running sum of rewards per (s,a,s') and divide by the count to get the average reward."},
+{t:"model",q:"What does a sample model provide that a distribution model does not require?",
+o:["It gives exact probabilities for each next state","It only generates one sampled next state","It requires training a neural network first","It supplies the discount factor directly"],a:1,
+e:"A distribution model gives exact p(s'|s,a); a sample model merely returns a sampled outcome, which is enough for sample-based updates/planning."},
+
+/* ---------- RTDP ---------- */
+{t:"rtdp",q:"What is the core insight behind Real-Time Dynamic Programming?",
+o:["Replace the value table with a neural network","Focus DP updates along reachable trajectories","Avoid using the Bellman equation altogether","Learn the environment model entirely from scratch"],a:1,
+e:"RTDP applies DP-style updates only along episodes sampled from the start state, concentrating effort on reachable/relevant states."},
+{t:"rtdp",q:"Does RTDP have access to a model?",
+o:["No, it is purely a model-free method","Yes, but it updates along sampled trajectories","Only a sample model that it learns online","No, it relies on Monte Carlo returns"],a:1,
+e:"Unlike model-free methods that update on traces out of necessity, RTDP has the model but chooses to update on trajectories from the start."},
+{t:"rtdp",q:"What problem with plain DP does RTDP address?",
+o:["The bias introduced by bootstrapping","The curse of dimensionality in full DP sweeps","The exploration-exploitation trade-off","Maximisation bias in the value targets"],a:1,
+e:"By updating only states actually reached from the start, RTDP avoids spending effort on unreachable/irrelevant states."},
+{t:"rtdp",q:"In the relevant-vs-irrelevant-states diagram, RTDP concentrates on:",
+o:["All states equally, exactly like full DP","States reachable from the start state","Only the terminal states of the problem","Only the single fixed start state"],a:1,
+e:"That diagram illustrates the DP-vs-RTDP contrast: DP covers everything, RTDP focuses on the reachable/relevant region."},
+
+/* ---------- Dyna ---------- */
+{t:"dyna",q:"What is the main idea of Dyna?",
+o:["Learn a model; update on simulated data too","Sweep through the entire state space each step","Use only real experience, never simulated","Avoid bootstrapping entirely in the updates"],a:0,
+e:"Dyna learns a model and uses it to produce extra simulated (s,a,r,s') data, applying e.g. Q-learning updates to both real and simulated experience."},
+{t:"dyna",q:"In Dyna, what does the planning budget k control?",
+o:["The discount factor used inside the return","The number of planning updates per real step","The exploration rate of the behaviour policy","The learning rate applied to the updates"],a:1,
+e:"After each real step, Dyna performs k planning updates from sampled model experience — more planning per real step means greater data efficiency."},
+{t:"dyna",q:"Which type of model does Dyna use?",
+o:["A backward / reverse predecessor model","A forward model predicting s', r from s,a","No model is used by the algorithm","A distribution-only model of the rewards"],a:1,
+e:"Dyna uses a forward model to simulate transitions; it replays randomly sampled previously-seen (s,a) pairs forward."},
+{t:"dyna",q:"In a stochastic environment, what can a high planning budget k cause?",
+o:["It always slows down the early learning","Fast early, worse final policy","It guarantees optimal convergence","It has no measurable effect on learning"],a:1,
+e:"More planning steps replay an imperfect (biased) model more heavily, which can speed early learning yet converge to a poorer asymptotic policy."},
+{t:"dyna",q:"How does Dyna choose which (s,a) to simulate during planning?",
+o:["The pair with the largest absolute TD error","Randomly among previously-observed (s,a) pairs","By searching backward from changed states","Always the single fixed start state-action"],a:1,
+e:"Plain Dyna samples uniformly from past-experienced (s,a); prioritizing by TD error and searching predecessors is what Prioritized Sweeping adds."},
+
+/* ---------- Prioritized Sweeping ---------- */
+{t:"psweep",q:"What determines the priority of a state-action in Prioritized Sweeping?",
+o:["The immediate reward of the transition","The current Q-value of the state-action","The absolute temporal-difference error","The number of visits to the state-action"],a:2,
+e:"The priority queue is ordered by the magnitude of the pending update — the absolute TD error."},
+{t:"psweep",q:"What extra model does Prioritized Sweeping need beyond Dyna's forward model?",
+o:["A reward-only model of the environment","A backward model to find the predecessors","A neural network value approximator","A full distribution model of the dynamics"],a:1,
+e:"To propagate a large value change to states that lead into the changed state, PS searches backward using a reverse model."},
+{t:"psweep",q:"The guiding insight of Prioritized Sweeping is:",
+o:["Update every state uniformly on each step","Big value changes mean predecessors need updates","Always update the start state before others","Discard the model once the values converge"],a:1,
+e:"Big value changes signal that information should propagate backward to predecessor states, which are queued by priority."},
+{t:"psweep",q:"What data structure is central to Prioritized Sweeping?",
+o:["A replay buffer of past real transitions","A priority queue on absolute TD error","A hash set of already-visited states","A stack holding complete past episodes"],a:1,
+e:"States-actions are inserted into a priority queue keyed on |TD error|; the highest-priority entries are popped and updated first."},
+{t:"psweep",q:"Compared with Dyna, Prioritized Sweeping mainly changes:",
+o:["Whether any model is used at all","Which updates run: targeted, not random","The discount factor applied to the return","Whether a learning rate is used at all"],a:1,
+e:"Both plan from a learned model; PS adds prioritization and backward propagation so planning effort goes where it matters most."},
+
+/* ---------- Interplay ---------- */
+{t:"interplay",q:"In planning-and-learning terminology, 'learning' updates come from:",
+o:["The model's simulated experience","Real interaction with the environment","Entries popped from the priority queue","The chosen discount factor"],a:1,
+e:"Learning = updating from real interaction; planning = updating from model-generated (simulated) experience."},
+{t:"interplay",q:"'Planning' updates come from:",
+o:["Real transitions taken in the environment","Simulated transitions produced by a model","Randomly injected exploration noise","Human-provided labelled examples"],a:1,
+e:"Planning uses the (learned or given) model to generate experience and update values without touching the real environment."},
+{t:"interplay",q:"What is the main benefit of combining planning with learning (e.g. Dyna)?",
+o:["It removes the need for any exploration","Greater data efficiency via model-based replay","It guarantees the optimal policy is found","It avoids all bootstrapping in the updates"],a:1,
+e:"By learning a model and planning with it, the agent extracts more value from each costly real interaction."},
+{t:"interplay",q:"A risk of relying heavily on planning is:",
+o:["Too little exploration in every single case","Model errors get amplified, hurting the policy","The discount factor becomes mathematically invalid","Bootstrapping stops working entirely"],a:1,
+e:"Simulated updates are only as good as the model; an inaccurate model means planning propagates wrong information (the Dyna-k effect)."},
+
+/* ---------- Psychology & Neuroscience ---------- */
+{t:"psych",q:"Classical (Pavlovian) conditioning corresponds to which RL problem?",
+o:["Control, that is, policy improvement","Prediction, that is, policy evaluation","Learning the environment's model","Exploration of novel actions"],a:1,
+e:"Classical conditioning is about predicting reward from a stimulus — analogous to policy evaluation/prediction."},
+{t:"psych",q:"Instrumental (operant) conditioning corresponds to:",
+o:["Prediction, that is, policy evaluation","Control / policy improvement","Learning the environment's transition model","Generalising across similar stimuli"],a:1,
+e:"Operant conditioning changes which actions are taken based on outcomes — analogous to control/policy improvement."},
+{t:"psych",q:"How does the Rescorla-Wagner model explain extinction (value V, reward r)?",
+o:["r>0, V=0, giving a positive prediction error","r=0, V>0, giving a negative error so V falls","r<0, V<0, producing no change at all","r=0, V=0, so no learning takes place"],a:1,
+e:"After conditioning V>0; withholding reward (r=0) gives a negative error (r−V), driving V down — the response extinguishes."},
+{t:"psych",q:"What can the TD model explain that Rescorla-Wagner cannot?",
+o:["Basic extinction of a conditioned response","Higher-order conditioning (γV(s') term)","Simple first-order acquisition of a response","The raw magnitude of the delivered reward"],a:1,
+e:"Because TD's signal includes the value of the next state, a stimulus predicting another valued stimulus can itself acquire value — secondary conditioning."},
+{t:"psych",q:"What do dopamine neurons appear to encode?",
+o:["The absolute magnitude of the reward","The reward-prediction error","The discount factor used by the agent","The policy mapping states to actions"],a:1,
+e:"Dopamine responses match reward-prediction errors: positive when outcomes beat expectation, dipping when they fall short."},
+{t:"psych",q:"After an animal learns a predictor of reward, the dopamine peak:",
+o:["It stays located at the reward itself","It shifts to after the predictor","It disappears from the signal entirely","It moves to just before the predictor cue"],a:1,
+e:"The predicted reward no longer surprises (no error there); the peak moves back to the predictor, which now raises expected value — exactly as TD predicts."},
+{t:"psych",q:"Blocking — where a prior conditioned stimulus prevents learning about a second — is explained by:",
+o:["The use of a larger discount factor","No prediction error remains","Random exploration among the stimuli","The use of function approximation"],a:1,
+e:"If the first stimulus already predicts the reward, the prediction error is ~0 when the second is added, so nothing new is learned about it."},
+{t:"psych",q:"The psychological 'stimulus trace' (a decaying memory assigning credit to preceding states) corresponds in RL to:",
+o:["Off-policy learning of action values","n-step methods, or eligibility traces","Partial observability of the state","Function approximation of the values"],a:1,
+e:"The lecture maps stimulus traces to n-step methods (eligibility traces being the exponentially-decaying form) — propagating credit over multiple preceding steps."},
+
+/* ---------- MCTS ---------- */
+{t:"mcts",q:"Decision-time planning means:",
+o:["Updating the global value function offline","Planning from the current state","Learning the environment model from data","Sweeping through all states uniformly"],a:1,
+e:"Decision-time planning focuses compute on the present state to select an action, as opposed to background planning that improves the global solution."},
+{t:"mcts",q:"In vanilla Monte Carlo Tree Search, the roll-out (simulation) phase uses which policy?",
+o:["A greedy policy on the current values","A random default policy","An ε-greedy exploratory policy","The known optimal policy"],a:1,
+e:"Vanilla MCTS plays out simulations with a random default policy beyond the built tree to get an outcome estimate."},
+{t:"mcts",q:"What statistics are typically stored at an action node in MCTS?",
+o:["Transition probabilities and a policy","Visit count and mean return","Only the learned reward model","Just the discount factor that is used"],a:1,
+e:"Each node tracks how often it was tried (n) and the average return through it (Q), feeding the UCT selection rule."},
+{t:"mcts",q:"In UCT, how does the uncertainty term scale with the visit count n(s,a)?",
+o:["It scales proportionally to n(s,a)","It scales like √n(s,a)","It scales like 1/√n(s,a)","It scales like 1/n(s,a)"],a:2,
+e:"UCT uses the UCB1 bonus c·√(ln N(s)/n(s,a)), so uncertainty scales as 1/√n(s,a) and shrinks with visits."},
+{t:"mcts",q:"What does sample-based planning (e.g. MCTS) require that classic expectimax search needs analytically?",
+o:["A full distribution model of the dynamics","Only a sample model that generates transitions","No model of the environment at all","A trained neural network value function"],a:1,
+e:"Sample-based search only needs to sample transitions, so it works with a simulator even when the exact transition distribution is unavailable."},
+{t:"mcts",q:"In Sparse Sampling with A actions, N sampled traces per action, and depth D, the number of samples scales as:",
+o:["A·N·D, linear in each of the factors","(A·N)^D, exponential in the depth","A^(N·D), the action base raised high","A·N^D, with depth on the traces"],a:1,
+e:"Each node branches into A·N children and this repeats for D levels, giving (A·N)^D — exponential in depth."},
+
+/* ---------- Function approximation ---------- */
+{t:"approx",q:"Why is function approximation needed in large RL problems?",
+o:["Mainly because it is faster to program","No room for a table; it also generalises","To remove the discount factor from returns","To avoid the need for any exploration"],a:1,
+e:"Both reasons hold: you can't store a table for huge state spaces, and approximation generalizes value estimates across similar states."},
+{t:"approx",q:"What replaces the lookup table in deep RL?",
+o:["A priority queue over the states","A neural network mapping states to outputs","A larger discount factor on the rewards","A learned sample model of the dynamics"],a:1,
+e:"Tabular values are replaced by a parameterized function (e.g. a neural network) that generalizes across states/actions."},
+{t:"approx",q:"Stochastic gradient descent is best described as:",
+o:["Trying random directions, reverting on failure","Small steps along the negative gradient","A second-order optimisation method","Eliminating each example's error exactly"],a:1,
+e:"SGD steps downhill along the (noisily estimated) negative gradient; it's first-order and each step only partially reduces the loss."},
+{t:"approx",q:"A key benefit of generalization in approximate methods is:",
+o:["It guarantees convergence to the optimum","Reasonable value estimates for unseen states","It removes bootstrapping from the updates","It makes the learned policy deterministic"],a:1,
+e:"Because the function shares parameters across states, learning about some states informs estimates for similar unseen ones."},
+
+/* ---------- Policy-based ---------- */
+{t:"policy",q:"How do policy-based methods differ from value-based methods?",
+o:["They additionally learn an environment model","They learn the policy directly, not via values","They are structurally unable to explore","They require a full distribution model"],a:1,
+e:"Value-based methods learn Q/V and act greedily; policy-based methods parameterize and optimize the action probabilities directly."},
+{t:"policy",q:"A distinctive advantage of policy-based methods is:",
+o:["They never require any exploration","Arbitrary action probabilities","They always converge faster than value methods","They need no learning rate at all"],a:1,
+e:"A parameterized (e.g. softmax) policy can express any action distribution, unlike ε-greedy value methods that keep ≥ε mass on every action."},
+{t:"policy",q:"What characterizes an actor-critic method?",
+o:["It learns only a value function","A policy (actor) plus a value (critic)","It keeps two value functions for bias","It is fundamentally a model-based method"],a:1,
+e:"The actor is the policy; the critic is a value function whose estimates (often a TD error) provide a lower-variance learning signal for the actor."},
+{t:"policy",q:"REINFORCE is:",
+o:["A standard actor-critic algorithm","A pure policy-gradient method, with no critic","A variant of value iteration","A method purely for learning the model"],a:1,
+e:"REINFORCE updates the policy using Monte Carlo returns directly; adding a value-function baseline/critic is what moves it toward actor-critic."},
+
+/* ---------- AlphaGo ---------- */
+{t:"alphago",q:"What neural networks did AlphaGo use?",
+o:["Only a value network for board positions","Only a policy network for candidate moves","A policy and a value network","Neither; it was a purely tabular system"],a:2,
+e:"AlphaGo combined a policy network (which moves to consider) and a value network (how good a position is)."},
+{t:"alphago",q:"AlphaGo used MCTS for which kind of planning?",
+o:["Background planning only","Decision-time, in-the-moment planning only","Both background and decision-time planning","Neither kind of planning"],a:2,
+e:"It used search both to improve its global solution during self-play training and to select moves at play time."},
+{t:"alphago",q:"What is the policy network's role within AlphaGo's search?",
+o:["To evaluate the final board positions","To narrow search breadth via promising moves","To compute the discount factor used","To store the visit counts in the tree"],a:1,
+e:"The policy network prunes the branching factor — focusing MCTS on a small set of plausible moves rather than all legal ones."},
+{t:"alphago",q:"What is the value network's role within AlphaGo's search?",
+o:["To suggest the candidate moves to try","To shorten search depth","To learn the environment's model","To set the learning rate of the updates"],a:1,
+e:"The value network estimates the worth of a position directly, so simulations can be cut off early instead of played to the end."},
+{t:"alphago",q:"Why couldn't tabular Q-learning be applied to Go directly?",
+o:["Because exploration in Go is impossible","The curse of dimensionality; ~10^170 states","Because the reward signal is undefined","Because Go has no terminal states"],a:1,
+e:"Go's astronomically large state space makes a per-state table infeasible, which is precisely why function approximation (neural networks) is required."},
+
+/* ---------- Supplementary (top-ups) ---------- */
+{t:"esarsa",q:"Why does Expected SARSA often allow a larger, more stable learning rate than SARSA?",
+o:["Because it bootstraps strictly less often","Its target has no next-action sampling variance","Because it relies on Monte Carlo returns","Because it requires a learned model"],a:1,
+e:"By averaging over next actions instead of sampling one, the target is deterministic given s', removing a source of update noise."},
+{t:"nstep",q:"Increasing n in an n-step method generally does what to the bias from bootstrapping?",
+o:["It increases the bias from bootstrapping","It decreases the bias but raises the variance","It has no effect on the bias at all","It removes the discount factor entirely"],a:1,
+e:"Using more actual rewards before the bootstrap reduces reliance on possibly-wrong value estimates (less bias) but the longer return is noisier (more variance)."},
+{t:"maxbias",q:"In a state where several actions have equal true value but noisy estimates, single-estimator Q-learning will tend to:",
+o:["It will underestimate the max action value","It overestimates, picking the luckiest","It estimates the value exactly correctly","It simply ignores that state entirely"],a:1,
+e:"The max selects the action with the largest (often upward-biased) estimate, so the backed-up value is systematically too high — maximization bias."},
+{t:"credit",q:"Why is delayed reward the heart of the credit assignment problem?",
+o:["Because it makes the rewards larger","Many actions intervene before the consequence","Because it removes the need for a policy","Because it only ever matters in bandits"],a:1,
+e:"When the payoff arrives many steps after the responsible action, the agent must work out which of the intervening choices actually mattered."},
+{t:"credit",q:"Bootstrapping (as in TD) helps credit assignment by:",
+o:["Waiting for the complete episode to finish","Passing reward back one estimate at a time","Removing the discount factor from returns","Sampling actions uniformly at random"],a:1,
+e:"TD passes value backward step by step via V(s')→V(s), gradually assigning credit to earlier states without waiting for the episode's end."},
+{t:"model",q:"After enough data, how does the tabular estimate p̂(s'|s,a) relate to the true dynamics?",
+o:["It diverges further from the true dynamics","It converges to the true probabilities","It stays uniform over the next states","It depends on the chosen discount factor"],a:1,
+e:"Normalizing growing counts n(s,a,s') makes the empirical frequencies approach the true transition probabilities."},
+{t:"model",q:"A learned model that is inaccurate will, during planning, mostly cause:",
+o:["It gives faster guaranteed convergence","It biases simulated updates toward wrong values","It has no measurable effect on the values","It mainly just reduces memory usage"],a:1,
+e:"Planning is only as good as the model; errors in p̂ or r̂ propagate into the values via simulated updates (the model-bias problem)."},
+{t:"rtdp",q:"How does RTDP relate to ordinary model-free RL in terms of how states are visited?",
+o:["RTDP sweeps while model-free samples traces","Both use traces, but RTDP does so by choice","Both sweep the entire state space","Neither method uses trajectories at all"],a:1,
+e:"Model-free methods sample trajectories out of necessity; RTDP deliberately adopts trajectory-based updates even though it has a model."},
+{t:"interplay",q:"Dyna is best summarized as which combination?",
+o:["Planning from a model only","Direct learning from real data only","Real learning plus model planning","Pure dynamic programming over all states"],a:2,
+e:"Dyna interleaves direct RL updates from real transitions with model-based (simulated) updates, applying the same learning rule to both."},
+{t:"approx",q:"What danger can arise when combining bootstrapping, off-policy learning, and function approximation?",
+o:["It guarantees strictly faster convergence","Instability or divergence can result","It removes the discount factor","It restores exact tabular accuracy"],a:1,
+e:"Together these three ingredients can destabilize learning — a known failure mode that tabular methods with exact representation avoid."},
+{t:"policy",q:"In what situation is a stochastic policy (easily represented by policy-based methods) genuinely optimal?",
+o:["It is never genuinely optimal in practice","In partially observable or adversarial settings","Only when the discount factor is zero","Only in deterministic gridworld tasks"],a:1,
+e:"When states are aliased or an opponent can exploit predictability, the optimal policy is a randomized mixture — which value-based ε-greedy cannot represent but policy-based methods can."},
+];
+
+/* ===================== APP STATE ===================== */
+let selected = new Set();
+let quizSet = [];
+let idx = 0;
+let score = 0;
+let answeredThis = false;
+let perTopic = {}; // topicId -> {correct, total}
+
+const topicById = Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+function countFor(topicId){ return Q.filter(q=>q.t===topicId).length; }
+
+/* ----- Build picker ----- */
+const topicList = document.getElementById('topicList');
+BLOCKS.forEach(b=>{
+  const lbl = document.createElement('div');
+  lbl.className='blocklabel'; lbl.textContent=b.label;
+  topicList.appendChild(lbl);
+  const chips = document.createElement('div');
+  chips.className='chips';
+  TOPICS.filter(t=>t.block===b.id).forEach(t=>{
+    const c = document.createElement('button');
+    c.className='chip'; c.dataset.id=t.id;
+    c.innerHTML = `${t.name} <span class="n">${countFor(t.id)}</span>`;
+    c.onclick=()=>{ toggle(t.id,c); };
+    chips.appendChild(c);
+  });
+  topicList.appendChild(chips);
+});
+function toggle(id,el){
+  if(selected.has(id)){selected.delete(id);el.classList.remove('on');}
+  else{selected.add(id);el.classList.add('on');}
+  refreshPicker();
+}
+function refreshPicker(){
+  const total = [...selected].reduce((s,id)=>s+countFor(id),0);
+  document.getElementById('poolCount').textContent =
+    selected.size? `${selected.size} topics · ${total} questions` : 'no topics selected';
+  document.getElementById('startBtn').disabled = selected.size===0;
+}
+document.getElementById('selAll').onclick=()=>{
+  document.querySelectorAll('.chip[data-id]').forEach(c=>{selected.add(c.dataset.id);c.classList.add('on');});
+  refreshPicker();
+};
+document.getElementById('selNone').onclick=()=>{
+  selected.clear();
+  document.querySelectorAll('.chip[data-id]').forEach(c=>c.classList.remove('on'));
+  refreshPicker();
+};
+refreshPicker();
+
+/* ----- Start ----- */
+document.getElementById('startBtn').onclick=()=>{
+  quizSet = Q.filter(q=>selected.has(q.t)).map(q=>({...q})); quizSet.forEach(q=>delete q._ord);
+  if(document.getElementById('shuffleChk').checked) shuffle(quizSet);
+  idx=0; score=0; perTopic={};
+  [...selected].forEach(id=>perTopic[id]={correct:0,total:0});
+  show('quiz'); renderQuestion();
+};
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+
+/* ----- Render question ----- */
+function renderQuestion(){
+  answeredThis=false;
+  const q = quizSet[idx];
+  const tp = topicById[q.t];
+  document.getElementById('progBar').style.width = `${(idx/quizSet.length)*100}%`;
+  document.getElementById('counter').textContent = `Q ${idx+1} / ${quizSet.length}`;
+  document.getElementById('liveScore').textContent = `${score} correct`;
+  document.getElementById('qtag').textContent = tp.name;
+  const qt = document.getElementById('qtext'); qt.innerHTML=q.q; qt.classList.remove('fade'); void qt.offsetWidth; qt.classList.add('fade');
+  if(!q._ord){ q._ord=q.o.map((_,i)=>i); shuffle(q._ord); }
+  const ob = document.getElementById('opts'); ob.innerHTML='';
+  q._ord.forEach((orig,pos)=>{
+    const b = document.createElement('button');
+    b.className='opt'; b.dataset.orig=orig;
+    b.innerHTML = `<span class="key">${String.fromCharCode(65+pos)}</span><span>${q.o[orig]}</span>`;
+    b.onclick=()=>choose(orig,b);
+    ob.appendChild(b);
+  });
+  document.getElementById('explBox').innerHTML='';
+  const nb=document.getElementById('nextBtn');
+  nb.disabled=true;
+  nb.textContent = (idx===quizSet.length-1)? 'See results' : 'Next';
+}
+
+function choose(i,btn){
+  if(answeredThis) return;
+  answeredThis=true;
+  const q=quizSet[idx];
+  perTopic[q.t].total++;
+  const buttons=[...document.querySelectorAll('.opt')];
+  buttons.forEach(b=>{
+    b.disabled=true;
+    const o=+b.dataset.orig;
+    if(o===q.a) b.classList.add('correct');
+    else if(o===i) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const ok = (i===q.a);
+  if(ok){score++; perTopic[q.t].correct++;}
+  document.getElementById('liveScore').textContent = `${score} correct`;
+  const box=document.getElementById('explBox');
+  box.innerHTML = `<div class="expl ${ok?'ok':'no'}">
+    <span class="verdict">${ok?'✓ Correct':'✗ Not quite'}</span>${q.e}</div>`;
+  document.getElementById('nextBtn').disabled=false;
+}
+
+document.getElementById('nextBtn').onclick=()=>{
+  if(!answeredThis) return;
+  if(idx<quizSet.length-1){ idx++; renderQuestion(); }
+  else finish();
+};
+document.getElementById('quitBtn').onclick=()=>{ if(confirm('Quit this quiz and choose new topics?')) show('picker'); };
+
+/* ----- Results ----- */
+function finish(){
+  show('results');
+  const total=quizSet.length;
+  const pct=Math.round((score/total)*100);
+  document.getElementById('progBar').style.width='100%';
+  // animate ring
+  const circ=2*Math.PI*64;
+  const fill=document.getElementById('ringFill');
+  fill.style.strokeDasharray=circ;
+  fill.style.transition='none'; fill.style.strokeDashoffset=circ;
+  void fill.getBoundingClientRect();
+  fill.style.transition='stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)';
+  fill.style.strokeDashoffset = circ*(1-score/total);
+  fill.style.stroke = pct>=80?'var(--good)':pct>=50?'var(--teal)':'var(--bad)';
+  // count up
+  let cur=0; const tgt=pct;
+  const pn=document.getElementById('pctNum');
+  const tick=setInterval(()=>{cur+=Math.max(1,Math.round(tgt/24));if(cur>=tgt){cur=tgt;clearInterval(tick);}pn.textContent=cur+'%';},28);
+  document.getElementById('pctFrac').textContent=`${score} / ${total}`;
+  const v=document.getElementById('verdict');
+  const note=document.getElementById('resultNote');
+  if(pct>=85){v.textContent='Exam-ready.';note.textContent='Strong command of the material across these topics. Worth a quick second pass on anything you missed.';}
+  else if(pct>=65){v.textContent='Solid footing.';note.textContent='Good grasp overall — focus your revision on the lower-scoring topics below.';}
+  else if(pct>=45){v.textContent='Getting there.';note.textContent='The foundations are forming. Revisit the weaker topics and re-run the quiz.';}
+  else{v.textContent='Worth another loop.';note.textContent='Plenty to consolidate — re-read the relevant lecture sections, then come back and try again.';}
+  // breakdown
+  const bd=document.getElementById('breakdown'); bd.innerHTML='';
+  Object.entries(perTopic).filter(([,v])=>v.total>0)
+    .sort((a,b)=> (a[1].correct/a[1].total)-(b[1].correct/b[1].total))
+    .forEach(([id,v])=>{
+      const f=Math.round((v.correct/v.total)*100);
+      const row=document.createElement('div'); row.className='brow';
+      row.innerHTML=`<span class="name">${topicById[id].name}</span>
+        <span class="bar"><i style="width:${f}%;background:${f>=80?'var(--good)':f>=50?'var(--teal)':'var(--bad)'}"></i></span>
+        <span class="frac">${v.correct}/${v.total}</span>`;
+      bd.appendChild(row);
+    });
+}
+document.getElementById('againBtn').onclick=()=>{
+  quizSet.forEach(q=>delete q._ord);
+  if(document.getElementById('shuffleChk').checked) shuffle(quizSet);
+  idx=0;score=0;[...selected].forEach(id=>perTopic[id]={correct:0,total:0});
+  show('quiz'); renderQuestion();
+};
+document.getElementById('newBtn').onclick=()=>show('picker');
+
+/* ----- View switch ----- */
+function show(which){
+  ['picker','quiz','results'].forEach(id=>{
+    document.getElementById(id).classList.toggle('hidden', id!==which);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

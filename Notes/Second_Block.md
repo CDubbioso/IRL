@@ -62,7 +62,7 @@ GPI Process:
 - **Disadvantages**: More complicated and slower to converge.
     - In off-policy learning, the behavior policy $b$ (the policy used to generate episodes) differs from the target policy $\pi$ (the policy being optimized).
     - **Problem**: If an action is not taken in the behavior policy, the value for that state-action pair is unknown.
-    - **Solution**: Importance sampling adjusts the returns to account for differences in probabilities between $b$ and $\pi$
+    - **Solution**: **Importance sampling** adjusts the returns to account for differences in probabilities between $b$ and $\pi$
 
 |           | **On-Policy**                      | **Off-Policy**                        |
 | --------- | ---------------------------------- | ------------------------------------- |
@@ -111,7 +111,7 @@ Q-learning is an off-policy method where the agent learns the optimal policy usi
 $$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right] $$
 
 - **Key Point**: The maximization bias occurs when the agent overestimates action values.
-- **Solution**: Double Q-learning uses two independent Q-tables to reduce maximization bias.
+- **Solution**: **Double Q-learning** uses two independent Q-tables to reduce maximization bias.
 
 ---
 ## Expected SARSA

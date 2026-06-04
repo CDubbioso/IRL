@@ -138,11 +138,11 @@ Markov Property $\rightarrow$ "_The future only depends on the present and not o
 | **Transition Function** |$p(s'\|s,a)$ | Probability of transitioning to a state given an action |
 | **Reward Function** | $r(s,a,s')$ | Immediate reward for transitioning between states |
 | **Discount Factor** | $γ$ | Factor that determines how much future rewards are valued |
-- **Policy**: Describes how the agent chooses actions in different states ($\pi (a \mid s)$).
-- **Trace**: A sequence of state-action-reward pairs induced by the policy ($\tau$).
-- **Return**: The cumulative sum of rewards from a trace ($R(\tau)$).
-- **Value**: The expected return from each state or action under a policy ($v^{\pi}(s),\ q^{\pi}(s,a)$).
-- **Optimal Value/Policy**: There exists one optimal value function with a greedy policy that maximizes the return ($v^*(s),\ q^*(s,a),\ \pi^*(s)$).
+- **Policy**: Describes how the agent chooses actions in different states ($`\pi(a \mid s)`$).
+- **Trace**: A sequence of state-action-reward pairs induced by the policy ($`\tau`$).
+- **Return**: The cumulative sum of rewards from a trace ($`R(\tau)`$).
+- **Value**: The expected return from each state or action under a policy ($`v^{\pi}(s),\ q^{\pi}(s,a)`$).
+- **Optimal Value/Policy**: There exists one optimal value function with a greedy policy that maximizes the return ($`v^*(s),\ q^*(s,a),\ \pi^*(s)`$).
 
 
 ### STATE

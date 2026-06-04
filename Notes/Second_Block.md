@@ -20,7 +20,7 @@ Goal: Estimate the value of states under a policy $\pi$
 ### First-Visit MC 
 - **Initialize state values** $v^{\pi}(s)$ by our desire.
 - **Generate episodes**: You start at an initial state and take actions according to the policy which forms an episode (a sequence of states, actions, and rewards).
-- **For each state visited in the episode**, update its value using the cumulative discounted rewards from that state onwards.
+- **For each state visited in the episode**, update its value using the **cumulative discounted rewards** from that state onwards.
     - **The update rule**: For each state visited, calculate the average reward after its first occurrence.
 
 $$ v^{\pi}(s) = \frac{(v^{\pi}(s) \text{ from previous episodes} + \text{new reward})}{\text{number of episodes}} $$

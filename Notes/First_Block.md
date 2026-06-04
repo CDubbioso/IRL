@@ -138,11 +138,11 @@ Markov Property $\rightarrow$ "_The future only depends on the present and not o
 | **Transition Function** |$p(s'\|s,a)$ | Probability of transitioning to a state given an action |
 | **Reward Function** | $r(s,a,s')$ | Immediate reward for transitioning between states |
 | **Discount Factor** | $γ$ | Factor that determines how much future rewards are valued |
-- **Policy**: Describes how the agent chooses actions in different states ($\pi (a|s)$).
+- **Policy**: Describes how the agent chooses actions in different states ($\pi (a \| s)$).
 - **Trace**: A sequence of state-action-reward pairs induced by the policy ($\tau$).
 - **Return**: The cumulative sum of rewards from a trace ($R(\tau)$).
-- **Value**: The expected return from each state or action under a policy ($v^\pi(s)$, $q^\pi(s,a)$).
-- **Optimal Value/Policy**: There exists one optimal value function with a greedy policy that maximizes the return ($v^*(s)$, $q^*(s,a)$, $\pi^*(s)$).
+- **Value**: The expected return from each state or action under a policy ($v^{\pi}(s) , q^{\pi}(s,a)$).
+- **Optimal Value/Policy**: There exists one optimal value function with a greedy policy that maximizes the return ($v^{*}(s) , q^{*}(s,a) , \pi^{*}(s)$).
 
 
 ### STATE
@@ -174,6 +174,10 @@ $\rightarrow$ sum of rewards of a trace
 $\rightarrow$ down-weight long-term rewards $\rightarrow$ Discounted Return 
 
 $$ R(\tau) = r_t + r_{t+1} + r_{t+2} \dots \qquad \rightarrow \qquad R(\tau) = r_t + \gamma \cdot r_{t+1} + {\gamma}^2 \cdot r_{t+2} \dots $$
+
+$\gamma \to 1$ future rewards have higher weight
+
+$\gamma \to 0$ future rewards have smaller weight
 
 ### Infinite Horizon 
 $\rightarrow$ sum of rewards infinitely unless a terminal state is reached

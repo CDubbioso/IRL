@@ -16,7 +16,7 @@ $\rightarrow$ an environment always give a sample
 ---
 ## Planning vs Learning 
 The distinction between planning and learning lies in two factors:
-1. **Access to MPD Dynamics** $\rightarrow$ **reversible** or **irreversible**
+1. **Access to MDP Dynamics** $\rightarrow$ **reversible** or **irreversible**
 2. **Storage of the solution** $\rightarrow$ **local** or **global**
     - **local** - stores a solution for a subset of all states
         - focus on current state
@@ -103,7 +103,7 @@ $\rightarrow$ combine **planning** and **learning** by using a learned model to 
 
 ### 1. Real-Time Dynamic Programming - RTDP
 Simple Dynamic Progrmming:
-- sweep th whole state space
+- sweep through whole state space
 - update each state with Bellman Equation untill convergence
 - Main Problem : ***Curse of Dimentionality*** 
     - $2^{nd}$ problem : many states are often not even reachable from start
@@ -217,7 +217,7 @@ $\rightarrow$ Downside: only considers cost so far ignoring future potential
 
 ---
 ### Heuristic Search ($A$\*)
-- Actual cumulative cost from "start" to state "$s$" $(g(s))$ + estimated cumulative cost from "$s$" to "end" $(h(s))$ 
+- Actual cumulative cost from "start" to state "$'s'$" $(g(s))$ + estimated cumulative cost from "$'s'$" to "end" $(h(s))$ 
     - Heuristic $h(s)$ must be **admissible** (never overestimate) to guarantee finding the best path.
     - Perfect heuristic = optimal value function $V^*(s)$.
     - $f(s) = g(s) \to \text{Dijkstra’s algorithm/Uniform-cost search} + h(s) \to \text{cumulative cost from s to end} = \text{A* search}$.

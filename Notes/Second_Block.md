@@ -120,7 +120,7 @@ Replace the single sampled next action with its expectation under $\pi$. This re
 - An extension of SARSA where the agent uses the expected value of the next state-action pair, weighted by the policy's probabilities. This can be used both on-policy and off-policy.
 - **Key Point**: Expected SARSA can provide a more stable learning process by averaging over possible actions rather than selecting the maximum.
 
-$$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \sum_a (\pi(a|s_{t+1})Q(s_{t+1},a)) - Q(s_t, a_t) \right] $$
+$$ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ R_{t+1} + \gamma \cdot \sum_a (\pi(a|s_{t+1})Q(s_{t+1},a)) - Q(s_t, a_t) \right] $$
 
 $\rightarrow$ It can be used on-policy or off-policy. If the target policy is **greedy**, Expected Sarsa becomes
 exactly **Q-learning**.
